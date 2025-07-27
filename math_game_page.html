@@ -362,9 +362,19 @@
                 return;
             }
 
-            const characteristic = getNameCharacteristic(playerName);
-            document.getElementById('playerInfo').innerHTML = 
-                `🎭 ¡Hola ${playerName}! Tu nombre significa que eres <strong>${characteristic}</strong>. ¡Perfecto para ser un MateMaster!`;
+            // Verificar si es la creadora
+            const isCreator = ['trinidad', 'triniodad', 'trini', 'trini'].includes(playerName.toLowerCase());
+            
+            if (isCreator) {
+                document.getElementById('playerInfo').innerHTML = 
+                    `👑 ¡OOO TU ERES MI CREADORA! 👑<br>
+                     <strong>OOO GRAN TRINIDAD LA MASTER DE LAS MATEMÁTICAS</strong><br>
+                     ¡BIENVENIDA A TU REINO DE LOS NÚMEROS! 🎯✨`;
+            } else {
+                const characteristic = getNameCharacteristic(playerName);
+                document.getElementById('playerInfo').innerHTML = 
+                    `🎭 ¡Hola ${playerName}! Tu nombre significa que eres <strong>${characteristic}</strong>. ¡Perfecto para ser un MateMaster!`;
+            }
 
             document.getElementById('welcomeScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
