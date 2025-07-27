@@ -1115,9 +1115,14 @@
         }
 
         // Función para guardar en servidor global
-        async function saveToGlobalServer(playerName, level, stats) {
-            try {
-                const response = await fetch('http://localhost:3000/api/rankings', {
+            async function saveToGlobalServer(playerName, level, stats) {
+        try {
+            // Usar la URL de Railway si está disponible, sino localhost
+            const serverUrl = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000' 
+                : `https://${window.location.hostname}`;
+            
+            const response = await fetch(`${serverUrl}/api/rankings`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1140,9 +1145,14 @@
         }
 
         // Función para obtener ranking global
-        async function getGlobalRanking() {
-            try {
-                const response = await fetch('http://localhost:3000/api/rankings');
+            async function getGlobalRanking() {
+        try {
+            // Usar la URL de Railway si está disponible, sino localhost
+            const serverUrl = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000' 
+                : `https://${window.location.hostname}`;
+            
+            const response = await fetch(`${serverUrl}/api/rankings`);
                 if (response.ok) {
                     const globalRanking = await response.json();
                     return globalRanking;
