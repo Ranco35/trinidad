@@ -613,17 +613,17 @@
             const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
             
             if (type === 'twiceConcert') {
-                // Problema de conciertos de TWICE
-                const concerts = [200, 350, 450, 280, 320, 400];
+                // Problema de conciertos de TWICE con números más grandes
+                const concerts = [800, 1000, 500, 320, 750, 900, 650, 850];
                 const concertIndex = Math.floor(Math.random() * concerts.length);
                 const attendees = concerts[concertIndex];
                 const concertNumber = concertIndex + 1;
                 
                 const correctAnswer = attendees;
                 const wrongAnswers = [
-                    attendees + 50,
-                    attendees - 30,
-                    attendees + 100
+                    attendees + 100,
+                    attendees - 50,
+                    attendees + 200
                 ].filter(x => x > 0);
 
                 return {
@@ -634,17 +634,17 @@
                     theme: 'twice'
                 };
             } else if (type === 'twiceAlbum') {
-                // Problema de álbumes vendidos
-                const albums = [150000, 200000, 180000, 220000, 160000];
+                // Problema de álbumes vendidos con números más grandes
+                const albums = [800000, 1000000, 500000, 320000, 750000, 900000, 650000, 850000];
                 const albumIndex = Math.floor(Math.random() * albums.length);
                 const sales = albums[albumIndex];
                 const albumNumber = albumIndex + 1;
                 
                 const correctAnswer = Math.round(sales / 1000); // Convertir a miles
                 const wrongAnswers = [
-                    correctAnswer + 10,
-                    correctAnswer - 5,
-                    correctAnswer + 20
+                    correctAnswer + 50,
+                    correctAnswer - 25,
+                    correctAnswer + 100
                 ].filter(x => x > 0);
 
                 return {
@@ -655,17 +655,17 @@
                     theme: 'twice'
                 };
             } else if (type === 'twiceTour') {
-                // Problema de giras
+                // Problema de giras con números más grandes
                 const cities = [8, 12, 15, 10, 18];
                 const cityIndex = Math.floor(Math.random() * cities.length);
-                const totalFans = cities[cityIndex] * (Math.floor(Math.random() * 5000) + 10000);
-                const fansPerCity = Math.round(totalFans / cities[cityIndex]);
+                const fansPerCity = Math.floor(Math.random() * 600) + 400; // 400-1000 fans por ciudad
+                const totalFans = cities[cityIndex] * fansPerCity;
                 
                 const correctAnswer = fansPerCity;
                 const wrongAnswers = [
-                    fansPerCity + 500,
-                    fansPerCity - 300,
-                    fansPerCity + 1000
+                    fansPerCity + 100,
+                    fansPerCity - 50,
+                    fansPerCity + 200
                 ].filter(x => x > 0);
 
                 return {
@@ -676,17 +676,17 @@
                     theme: 'twice'
                 };
             } else if (type === 'twiceFans') {
-                // Problema de fans por país
+                // Problema de fans por país con números más grandes
                 const countries = ['Corea', 'Japón', 'Estados Unidos', 'Tailandia', 'Filipinas'];
                 const countryIndex = Math.floor(Math.random() * countries.length);
-                const fans = Math.floor(Math.random() * 50000) + 10000;
+                const fans = Math.floor(Math.random() * 600) + 400; // 400-1000 fans
                 const country = countries[countryIndex];
                 
                 const correctAnswer = fans;
                 const wrongAnswers = [
-                    fans + 5000,
-                    fans - 3000,
-                    fans + 10000
+                    fans + 100,
+                    fans - 50,
+                    fans + 200
                 ].filter(x => x > 0);
 
                 return {
@@ -697,23 +697,23 @@
                     theme: 'twice'
                 };
             } else {
-                // Problema de mercancía
+                // Problema de mercancía con números más grandes
                 const items = ['photocards', 'albums', 'lightsticks', 'posters'];
                 const itemIndex = Math.floor(Math.random() * items.length);
                 const item = items[itemIndex];
-                const price = Math.floor(Math.random() * 20) + 10;
+                const price = Math.floor(Math.random() * 600) + 400; // 400-1000 precio
                 const quantity = Math.floor(Math.random() * 100) + 50;
                 const totalRevenue = price * quantity;
                 
                 const correctAnswer = Math.round(totalRevenue / quantity);
                 const wrongAnswers = [
-                    correctAnswer + 2,
-                    correctAnswer - 1,
-                    correctAnswer + 5
+                    correctAnswer + 50,
+                    correctAnswer - 25,
+                    correctAnswer + 100
                 ].filter(x => x > 0);
 
                 return {
-                    question: `Se vendieron ${quantity} ${item} de TWICE por $${totalRevenue} en total. ¿Cuál es el precio promedio por ${item.slice(0, -1)}?`,
+                    question: `Se vendieron ${quantity} ${item} de TWICE por $${totalRevenue.toLocaleString()} en total. ¿Cuál es el precio promedio por ${item.slice(0, -1)}?`,
                     options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
                     correct: correctAnswer,
                     isFinal: isFinal,
