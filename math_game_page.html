@@ -665,111 +665,203 @@
         }
 
         function generateExpertQuestion(isFinal) {
-            const questionTypes = ['twiceConcert', 'twiceAlbum', 'twiceTour', 'twiceFans', 'twiceMerch'];
+            const questionTypes = ['twiceConcert', 'twiceAlbum', 'twiceTour', 'twiceFans', 'twiceMerch', 'twiceAwards', 'twiceViews'];
             const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
             
             if (type === 'twiceConcert') {
-                // Problema de conciertos de TWICE con números más grandes
-                const concerts = [800, 1000, 500, 320, 750, 900, 650, 850];
-                const concertIndex = Math.floor(Math.random() * concerts.length);
-                const attendees = concerts[concertIndex];
-                const concertNumber = concertIndex + 1;
+                // Problema de promedio de asistentes a múltiples conciertos
+                const concerts = [];
+                const numConcerts = Math.floor(Math.random() * 3) + 3; // 3-5 conciertos
+                let totalAttendees = 0;
                 
-                const correctAnswer = attendees;
+                for (let i = 0; i < numConcerts; i++) {
+                    const attendees = Math.floor(Math.random() * 800) + 400; // 400-1200 por concierto
+                    concerts.push(attendees);
+                    totalAttendees += attendees;
+                }
+                
+                const correctAnswer = Math.round(totalAttendees / numConcerts);
                 const wrongAnswers = [
-                    attendees + 100,
-                    attendees - 50,
-                    attendees + 200
+                    Math.round(totalAttendees / (numConcerts + 1)),
+                    Math.round(totalAttendees / (numConcerts - 1)),
+                    Math.round((totalAttendees + 100) / numConcerts)
                 ].filter(x => x > 0);
 
                 return {
-                    question: `En el concierto número ${concertNumber} de TWICE fueron ${attendees} personas. ¿Cuántas personas asistieron?`,
+                    question: `TWICE dio ${numConcerts} conciertos con ${concerts.join(', ')} asistentes respectivamente. ¿Cuál es el promedio de asistentes por concierto?`,
                     options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
                     correct: correctAnswer,
                     isFinal: isFinal,
                     theme: 'twice'
                 };
             } else if (type === 'twiceAlbum') {
-                // Problema de álbumes vendidos con números más grandes
-                const albums = [800000, 1000000, 500000, 320000, 750000, 900000, 650000, 850000];
-                const albumIndex = Math.floor(Math.random() * albums.length);
-                const sales = albums[albumIndex];
-                const albumNumber = albumIndex + 1;
+                // Problema de promedio de ventas de múltiples álbumes
+                const albums = [];
+                const numAlbums = Math.floor(Math.random() * 3) + 2; // 2-4 álbumes
+                let totalSales = 0;
                 
-                const correctAnswer = Math.round(sales / 1000); // Convertir a miles
+                for (let i = 0; i < numAlbums; i++) {
+                    const sales = Math.floor(Math.random() * 500000) + 300000; // 300k-800k por álbum
+                    albums.push(sales);
+                    totalSales += sales;
+                }
+                
+                const correctAnswer = Math.round(totalSales / numAlbums);
                 const wrongAnswers = [
-                    correctAnswer + 50,
-                    correctAnswer - 25,
-                    correctAnswer + 100
+                    Math.round(totalSales / (numAlbums + 1)),
+                    Math.round(totalSales / (numAlbums - 1)),
+                    Math.round((totalSales + 100000) / numAlbums)
                 ].filter(x => x > 0);
 
                 return {
-                    question: `El álbum número ${albumNumber} de TWICE vendió ${sales.toLocaleString()} copias. ¿Cuántos miles de copias vendió?`,
+                    question: `Los últimos ${numAlbums} álbumes de TWICE vendieron ${albums.map(s => s.toLocaleString()).join(', ')} copias respectivamente. ¿Cuál es el promedio de ventas por álbum?`,
                     options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
                     correct: correctAnswer,
                     isFinal: isFinal,
                     theme: 'twice'
                 };
             } else if (type === 'twiceTour') {
-                // Problema de giras con números más grandes
-                const cities = [8, 12, 15, 10, 18];
-                const cityIndex = Math.floor(Math.random() * cities.length);
-                const fansPerCity = Math.floor(Math.random() * 600) + 400; // 400-1000 fans por ciudad
-                const totalFans = cities[cityIndex] * fansPerCity;
+                // Problema de promedio de fans por ciudad en diferentes países
+                const countries = ['Corea', 'Japón', 'Estados Unidos', 'Tailandia', 'Filipinas', 'México', 'Brasil'];
+                const numCountries = Math.floor(Math.random() * 3) + 3; // 3-5 países
+                const selectedCountries = [];
+                const fansPerCountry = [];
+                let totalFans = 0;
                 
-                const correctAnswer = fansPerCity;
+                for (let i = 0; i < numCountries; i++) {
+                    const country = countries[Math.floor(Math.random() * countries.length)];
+                    const fans = Math.floor(Math.random() * 800) + 200; // 200-1000 fans por país
+                    selectedCountries.push(country);
+                    fansPerCountry.push(fans);
+                    totalFans += fans;
+                }
+                
+                const correctAnswer = Math.round(totalFans / numCountries);
                 const wrongAnswers = [
-                    fansPerCity + 100,
-                    fansPerCity - 50,
-                    fansPerCity + 200
+                    Math.round(totalFans / (numCountries + 1)),
+                    Math.round(totalFans / (numCountries - 1)),
+                    Math.round((totalFans + 100) / numCountries)
                 ].filter(x => x > 0);
 
                 return {
-                    question: `En la gira de TWICE visitaron ${cities[cityIndex]} ciudades con ${totalFans.toLocaleString()} fans en total. ¿Cuántos fans promedio por ciudad?`,
+                    question: `En ${selectedCountries.join(', ')} hay ${fansPerCountry.join(', ')} ONCE respectivamente. ¿Cuál es el promedio de fans por país?`,
                     options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
                     correct: correctAnswer,
                     isFinal: isFinal,
                     theme: 'twice'
                 };
             } else if (type === 'twiceFans') {
-                // Problema de fans por país con números más grandes
-                const countries = ['Corea', 'Japón', 'Estados Unidos', 'Tailandia', 'Filipinas'];
-                const countryIndex = Math.floor(Math.random() * countries.length);
-                const fans = Math.floor(Math.random() * 600) + 400; // 400-1000 fans
-                const country = countries[countryIndex];
+                // Problema de promedio de fans por ciudad en un país específico
+                const cities = ['Seúl', 'Busan', 'Incheon', 'Daegu', 'Daejeon', 'Gwangju', 'Suwon'];
+                const numCities = Math.floor(Math.random() * 3) + 3; // 3-5 ciudades
+                const selectedCities = [];
+                const fansPerCity = [];
+                let totalFans = 0;
                 
-                const correctAnswer = fans;
+                for (let i = 0; i < numCities; i++) {
+                    const city = cities[Math.floor(Math.random() * cities.length)];
+                    const fans = Math.floor(Math.random() * 600) + 100; // 100-700 fans por ciudad
+                    selectedCities.push(city);
+                    fansPerCity.push(fans);
+                    totalFans += fans;
+                }
+                
+                const correctAnswer = Math.round(totalFans / numCities);
                 const wrongAnswers = [
-                    fans + 100,
-                    fans - 50,
-                    fans + 200
+                    Math.round(totalFans / (numCities + 1)),
+                    Math.round(totalFans / (numCities - 1)),
+                    Math.round((totalFans + 50) / numCities)
                 ].filter(x => x > 0);
 
                 return {
-                    question: `En ${country} hay ${fans.toLocaleString()} ONCE (fans de TWICE). ¿Cuántos fans hay en ${country}?`,
+                    question: `En las ciudades ${selectedCities.join(', ')} hay ${fansPerCity.join(', ')} ONCE respectivamente. ¿Cuál es el promedio de fans por ciudad?`,
+                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+                    correct: correctAnswer,
+                    isFinal: isFinal,
+                    theme: 'twice'
+                };
+            } else if (type === 'twiceMerch') {
+                // Problema de promedio de precios de diferentes productos
+                const products = ['photocards', 'albums', 'lightsticks', 'posters', 'hoodies', 't-shirts'];
+                const numProducts = Math.floor(Math.random() * 3) + 3; // 3-5 productos
+                const selectedProducts = [];
+                const prices = [];
+                let totalPrice = 0;
+                
+                for (let i = 0; i < numProducts; i++) {
+                    const product = products[Math.floor(Math.random() * products.length)];
+                    const price = Math.floor(Math.random() * 80) + 20; // $20-$100 por producto
+                    selectedProducts.push(product);
+                    prices.push(price);
+                    totalPrice += price;
+                }
+                
+                const correctAnswer = Math.round(totalPrice / numProducts);
+                const wrongAnswers = [
+                    Math.round(totalPrice / (numProducts + 1)),
+                    Math.round(totalPrice / (numProducts - 1)),
+                    Math.round((totalPrice + 10) / numProducts)
+                ].filter(x => x > 0);
+
+                return {
+                    question: `Los productos ${selectedProducts.join(', ')} cuestan $${prices.join(', $')} respectivamente. ¿Cuál es el precio promedio por producto?`,
+                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+                    correct: correctAnswer,
+                    isFinal: isFinal,
+                    theme: 'twice'
+                };
+            } else if (type === 'twiceAwards') {
+                // Problema de promedio de premios por año
+                const years = [];
+                const awards = [];
+                const numYears = Math.floor(Math.random() * 3) + 3; // 3-5 años
+                let totalAwards = 0;
+                
+                for (let i = 0; i < numYears; i++) {
+                    const year = 2019 + i;
+                    const awardCount = Math.floor(Math.random() * 15) + 5; // 5-20 premios por año
+                    years.push(year);
+                    awards.push(awardCount);
+                    totalAwards += awardCount;
+                }
+                
+                const correctAnswer = Math.round(totalAwards / numYears);
+                const wrongAnswers = [
+                    Math.round(totalAwards / (numYears + 1)),
+                    Math.round(totalAwards / (numYears - 1)),
+                    Math.round((totalAwards + 5) / numYears)
+                ].filter(x => x > 0);
+
+                return {
+                    question: `En los años ${years.join(', ')} TWICE ganó ${awards.join(', ')} premios respectivamente. ¿Cuál es el promedio de premios por año?`,
                     options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
                     correct: correctAnswer,
                     isFinal: isFinal,
                     theme: 'twice'
                 };
             } else {
-                // Problema de mercancía con números más grandes
-                const items = ['photocards', 'albums', 'lightsticks', 'posters'];
-                const itemIndex = Math.floor(Math.random() * items.length);
-                const item = items[itemIndex];
-                const price = Math.floor(Math.random() * 600) + 400; // 400-1000 precio
-                const quantity = Math.floor(Math.random() * 100) + 50;
-                const totalRevenue = price * quantity;
+                // Problema de promedio de vistas de videos
+                const videos = [];
+                const views = [];
+                const numVideos = Math.floor(Math.random() * 3) + 3; // 3-5 videos
+                let totalViews = 0;
                 
-                const correctAnswer = Math.round(totalRevenue / quantity);
+                for (let i = 0; i < numVideos; i++) {
+                    const viewCount = Math.floor(Math.random() * 50000000) + 10000000; // 10M-60M vistas
+                    videos.push(`video ${i + 1}`);
+                    views.push(viewCount);
+                    totalViews += viewCount;
+                }
+                
+                const correctAnswer = Math.round(totalViews / numVideos);
                 const wrongAnswers = [
-                    correctAnswer + 50,
-                    correctAnswer - 25,
-                    correctAnswer + 100
+                    Math.round(totalViews / (numVideos + 1)),
+                    Math.round(totalViews / (numVideos - 1)),
+                    Math.round((totalViews + 1000000) / numVideos)
                 ].filter(x => x > 0);
 
                 return {
-                    question: `Se vendieron ${quantity} ${item} de TWICE por $${totalRevenue.toLocaleString()} en total. ¿Cuál es el precio promedio por ${item.slice(0, -1)}?`,
+                    question: `Los videos ${videos.join(', ')} tienen ${views.map(v => v.toLocaleString()).join(', ')} vistas respectivamente. ¿Cuál es el promedio de vistas por video?`,
                     options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
                     correct: correctAnswer,
                     isFinal: isFinal,
