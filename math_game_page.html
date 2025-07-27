@@ -447,6 +447,13 @@
                 <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin: 20px 0;">
                     <p style="margin: 0; font-size: 1.1em;">📊 Progreso General: <span id="totalProgress">0</span>/20 puntos</p>
                 </div>
+                <div style="background: rgba(255,255,255,0.15); border-radius: 10px; padding: 12px; margin: 15px 0; border: 2px solid rgba(255,255,255,0.3);">
+                    <p style="margin: 0; font-size: 0.95em; color: #e2e8f0;">
+                        ⭐ <strong>Para pasar de nivel necesitas:</strong><br>
+                        • Al menos 3 respuestas correctas (60%)<br>
+                        • Responder bien la pregunta decisiva (pregunta 5)
+                    </p>
+                </div>
             </div>
             
             <div class="level-selector">
@@ -577,14 +584,29 @@
                 
                 if (i <= unlockedLevels) {
                     card.classList.remove('locked');
-                    if (levelScores[i-1] === 5) {
+                    
+                    // Verificar si el nivel fue realmente completado (no solo puntuación)
+                    const levelData = levelStats[playerName] && levelStats[playerName][`level${i}`];
+                    const isCompleted = levelData && levelData.completed === true;
+                    
+                    if (isCompleted) {
                         card.classList.add('completed');
+                    } else {
+                        card.classList.remove('completed');
                     }
                 } else {
                     card.classList.add('locked');
+                    card.classList.remove('completed');
                 }
                 
                 scoreSpan.textContent = levelScores[i-1];
+            }
+            
+            // Actualizar progreso total
+            const totalProgress = levelScores.reduce((sum, score) => sum + score, 0);
+            const totalProgressElement = document.getElementById('totalProgress');
+            if (totalProgressElement) {
+                totalProgressElement.textContent = totalProgress;
             }
         }
 
@@ -1024,7 +1046,7 @@
 
         function finishLevel() {
             const question5 = questions[4];
-            // Corregir la lógica: verificar si la pregunta decisiva fue respondida correctamente
+            // Verificar si la pregunta decisiva fue respondida correctamente
             const finalQuestionCorrect = questions[4].correct.toString() === 
                 document.querySelector('.option-btn.correct')?.textContent;
             
@@ -1035,6 +1057,13 @@
             
             levelScores[currentLevel - 1] = score;
             
+            // CRITERIOS PARA PASAR DE NIVEL:
+            // 1. Al menos 3 respuestas correctas (60%)
+            // 2. Responder correctamente la pregunta decisiva (pregunta 5)
+            const levelCompleted = score >= 3 && finalQuestionCorrect;
+            
+            console.log(`Nivel ${currentLevel}: ${score}/5 correctas, pregunta final: ${finalQuestionCorrect ? 'CORRECTA' : 'INCORRECTA'}, Completado: ${levelCompleted ? 'SÍ' : 'NO'}`);
+            
             // Guardar estadísticas del jugador
             if (!levelStats[playerName]) {
                 levelStats[playerName] = {};
@@ -1044,12 +1073,28 @@
                 correct: currentStats.correct,
                 incorrect: currentStats.incorrect,
                 score: score,
-                completed: score >= 3 && finalQuestionCorrect
+                completed: levelCompleted
             };
             
             // Guardar datos en localStorage
             localStorage.setItem('mateMasterScores', JSON.stringify(levelScores));
             localStorage.setItem('mateMasterStats', JSON.stringify(levelStats));
+            
+            // Solo desbloquear siguiente nivel si se cumplen AMBOS criterios
+            if (levelCompleted) {
+                if (currentLevel < 4) {
+                    unlockedLevels = Math.max(unlockedLevels, currentLevel + 1);
+                    localStorage.setItem('mateMasterUnlockedLevels', unlockedLevels.toString());
+                    showLevelCompletedMessage(currentLevel, score, timeSpent, true, false, finalQuestionCorrect);
+                } else {
+                    showLevelCompletedMessage(currentLevel, score, timeSpent, false, false, finalQuestionCorrect);
+                }
+            } else {
+                // No pasó el nivel - mostrar qué faltó
+                const failedFinalQuestion = !finalQuestionCorrect;
+                const insufficientScore = score < 3;
+                showLevelCompletedMessage(currentLevel, score, timeSpent, false, failedFinalQuestion, finalQuestionCorrect, insufficientScore);
+            }
             
             // Guardar en servidor global (si está disponible)
             saveToGlobalServer(playerName, currentLevel, {
@@ -1057,7 +1102,7 @@
                 correct: currentStats.correct,
                 incorrect: currentStats.incorrect,
                 score: score,
-                completed: score >= 3 && finalQuestionCorrect
+                completed: levelCompleted
             });
             
             // Guardar en servidor global (si está disponible)
@@ -1066,32 +1111,128 @@
                 correct: currentStats.correct,
                 incorrect: currentStats.incorrect,
                 score: score,
-                completed: score >= 3 && finalQuestionCorrect
+                completed: levelCompleted
             });
+        }
+
+        // Función para mostrar mensaje de nivel completado con botones apropiados
+        function showLevelCompletedMessage(level, score, timeSpent, levelUnlocked, failedFinalQuestion = false, finalQuestionCorrect = true, insufficientScore = false) {
+            let message = '';
+            let buttonText = '';
+            let buttonAction = '';
+            let buttonColor = '';
             
+            // NIVEL COMPLETADO EXITOSAMENTE
             if (score >= 3 && finalQuestionCorrect) {
-                if (currentLevel < 4) {
-                    unlockedLevels = Math.max(unlockedLevels, currentLevel + 1);
-                    localStorage.setItem('mateMasterUnlockedLevels', unlockedLevels.toString());
+                if (levelUnlocked) {
+                    message = `🎉 ¡INCREÍBLE ${playerName}! 
+                               Completaste el nivel ${level} con ${score}/5 puntos en ${timeSpent} segundos.
+                               ¡Has desbloqueado el nivel ${level + 1}! 🚀`;
+                    buttonText = `🎯 ¡Pasaste al Nivel ${level + 1}!`;
+                    buttonAction = 'goToNextLevel()';
+                    buttonColor = '#48bb78';
+                } else {
+                    message = `🏆 ¡FELICITACIONES ${playerName}! 
+                               Completaste el nivel ${level} con ${score}/5 puntos en ${timeSpent} segundos.
+                               ¡Has completado todos los niveles de MateMaster! 🌟`;
+                    buttonText = '🏆 Ver Niveles Completados';
+                    buttonAction = 'backToLevels()';
+                    buttonColor = '#667eea';
                 }
-                showSuccessMessage(`🎉 ¡Felicitaciones ${playerName}! 
-                       Completaste el nivel ${currentLevel} con ${score}/5 puntos en ${timeSpent} segundos.
-                       ${currentLevel < 4 ? '¡Siguiente nivel desbloqueado!' : '¡Has completado todos los niveles!'}`);
             } else {
-                let message = `😊 Buen intento ${playerName}. 
-                       Obtuviste ${score}/5 puntos en el nivel ${currentLevel} en ${timeSpent} segundos.`;
+                // NIVEL NO COMPLETADO - Mostrar razones específicas
+                message = `😔 ${playerName}, obtuviste ${score}/5 puntos en ${timeSpent} segundos.`;
                 
-                if (!finalQuestionCorrect) {
-                    message += ' Necesitas pasar la pregunta decisiva para avanzar.';
-                } else if (score < 3) {
-                    message += ' Necesitas al menos 3 puntos correctos para avanzar.';
+                let reasons = [];
+                if (insufficientScore) {
+                    reasons.push('❌ Necesitas al menos 3 respuestas correctas');
                 }
-                message += ' ¡Inténtalo de nuevo!';
+                if (failedFinalQuestion) {
+                    reasons.push('❌ Debes responder correctamente la pregunta decisiva (pregunta 5)');
+                }
                 
-                showInfoMessage(message);
+                if (reasons.length > 0) {
+                    message += `\n\n📋 Para avanzar al siguiente nivel necesitas:\n${reasons.join('\n')}`;
+                }
+                
+                message += '\n\n💪 ¡No te rindas! Con práctica puedes lograrlo.';
+                
+                buttonText = `🔄 Intentar Nivel ${level} de Nuevo`;
+                buttonAction = `selectLevel(${level})`;
+                buttonColor = '#f56565';
             }
             
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 40px;
+                border-radius: 25px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                z-index: 1000;
+                text-align: center;
+                max-width: 500px;
+                font-size: 1.1em;
+                border: 3px solid ${buttonColor};
+            `;
+            
+            messageDiv.innerHTML = `
+                <div style="font-size: 3em; margin-bottom: 20px;">
+                    ${score >= 3 && !failedFinalQuestion ? '🎉' : '🎯'}
+                </div>
+                <div style="color: #4a5568; line-height: 1.6; margin-bottom: 30px;">
+                    ${message}
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <button onclick="${buttonAction}" style="
+                        background: linear-gradient(135deg, ${buttonColor}, ${buttonColor}dd);
+                        color: white;
+                        border: none;
+                        padding: 18px 30px;
+                        border-radius: 15px;
+                        font-size: 1.2em;
+                        cursor: pointer;
+                        font-family: inherit;
+                        font-weight: bold;
+                        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        ${buttonText}
+                    </button>
+                    <button onclick="backToLevels(); this.parentElement.parentElement.parentElement.remove();" style="
+                        background: #f7fafc;
+                        color: #4a5568;
+                        border: 2px solid #e2e8f0;
+                        padding: 12px 25px;
+                        border-radius: 10px;
+                        font-size: 1em;
+                        cursor: pointer;
+                        font-family: inherit;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.background='#edf2f7'" onmouseout="this.style.background='#f7fafc'">
+                        🏠 Volver a Niveles
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(messageDiv);
+        }
+
+        // Función para ir al siguiente nivel
+        function goToNextLevel() {
+            // Cerrar el modal
+            document.querySelector('[style*="position: fixed"]').remove();
+            // Actualizar las tarjetas de nivel
+            updateLevelCards();
+            // Ir a la pantalla de niveles
             backToLevels();
+            // Mostrar mensaje de nivel desbloqueado
+            setTimeout(() => {
+                showInfoMessage(`🎯 ¡Nivel ${currentLevel + 1} desbloqueado! ¡Haz clic en la tarjeta para jugar!`);
+            }, 500);
         }
 
         // Función para mostrar mensajes de éxito
@@ -1170,6 +1311,8 @@
             document.getElementById('questionScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
             updateLevelCards();
+            // Actualizar ranking al volver
+            loadTopPlayers();
         }
 
         function resetProgress() {
