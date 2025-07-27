@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎯 MateMaster - Divisiones y Promedios | Hecho por Trinidad Proboste</title>
+    <!-- Supabase JS -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -294,7 +296,8 @@
             </div>
             
             <button class="btn" onclick="startGame()">¡Comenzar Aventura!</button>
-            <button class="btn" onclick="showRanking()" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">🏆 Ver Ranking</button>
+            <button class="btn" onclick="showRanking()" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">🏆 Ranking Local</button>
+            <button class="btn" onclick="showGlobalRanking()" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">🌍 Ranking Global</button>
             <button class="btn" onclick="resetProgress()" style="background: linear-gradient(135deg, #f56565, #e53e3e);">🔄 Reiniciar Progreso</button>
         </div>
 
@@ -887,6 +890,24 @@
             localStorage.setItem('mateMasterScores', JSON.stringify(levelScores));
             localStorage.setItem('mateMasterStats', JSON.stringify(levelStats));
             
+            // Guardar en servidor global (si está disponible)
+            saveToGlobalServer(playerName, currentLevel, {
+                time: timeSpent,
+                correct: currentStats.correct,
+                incorrect: currentStats.incorrect,
+                score: score,
+                completed: score >= 3 && finalQuestionCorrect
+            });
+            
+            // Guardar en servidor global (si está disponible)
+            saveToGlobalRanking(playerName, currentLevel, {
+                time: timeSpent,
+                correct: currentStats.correct,
+                incorrect: currentStats.incorrect,
+                score: score,
+                completed: score >= 3 && finalQuestionCorrect
+            });
+            
             if (score >= 3 && finalQuestionCorrect) {
                 if (currentLevel < 4) {
                     unlockedLevels = Math.max(unlockedLevels, currentLevel + 1);
@@ -1003,7 +1024,7 @@
             }
         }
 
-        function showRanking() {
+        async function showRanking() {
             const rankingDiv = document.createElement('div');
             rankingDiv.style.cssText = `
                 position: fixed;
@@ -1023,79 +1044,152 @@
                 font-size: 1.1em;
             `;
             
-            let rankingHTML = '<h2>🏆 Ranking de MateMaster 🏆</h2>';
-            
-            if (Object.keys(levelStats).length === 0) {
-                rankingHTML += '<p>¡Aún no hay estadísticas! ¡Juega para crear el ranking!</p>';
-            } else {
-                // Ordenar jugadores por tiempo total
-                const players = Object.keys(levelStats);
-                const playerStats = players.map(player => {
-                    let totalTime = 0;
-                    let totalCorrect = 0;
-                    let totalIncorrect = 0;
-                    let completedLevels = 0;
-                    
-                    for (let level = 1; level <= 4; level++) {
-                        const levelData = levelStats[player][`level${level}`];
-                        if (levelData && levelData.completed) {
-                            totalTime += levelData.time;
-                            totalCorrect += levelData.correct;
-                            totalIncorrect += levelData.incorrect;
-                            completedLevels++;
-                        }
-                    }
-                    
-                    return {
-                        name: player,
-                        totalTime,
-                        totalCorrect,
-                        totalIncorrect,
-                        completedLevels
-                    };
-                }).filter(p => p.completedLevels > 0).sort((a, b) => a.totalTime - b.totalTime);
-                
-                rankingHTML += '<div style="text-align: left;">';
-                playerStats.forEach((player, index) => {
-                    const timeStr = player.totalTime < 60 ? 
-                        `${player.totalTime}s` : 
-                        `${Math.floor(player.totalTime/60)}m ${player.totalTime%60}s`;
-                    
-                    rankingHTML += `
-                        <div style="margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px;">
-                            <h3>${index + 1}. ${player.name}</h3>
-                            <p>⏱️ Tiempo total: ${timeStr}</p>
-                            <p>✅ Correctas: ${player.totalCorrect} | ❌ Incorrectas: ${player.totalIncorrect}</p>
-                            <p>🎯 Niveles completados: ${player.completedLevels}/4</p>
-                        </div>
-                    `;
-                });
-                rankingHTML += '</div>';
-            }
-            
-            rankingHTML += `
-                <br><br>
-                <button onclick="this.parentElement.remove()" style="
-                    background: white;
-                    color: #ff9a9e;
-                    border: none;
-                    padding: 10px 20px;
-                    border-radius: 10px;
-                    font-size: 1em;
-                    cursor: pointer;
-                    font-family: inherit;
-                    font-weight: bold;
-                ">Cerrar Ranking</button>
-            `;
-            
-            rankingDiv.innerHTML = rankingHTML;
+            rankingDiv.innerHTML = '<h2>🏆 Cargando Ranking Global... 🏆</h2><p>⏳</p>';
             document.body.appendChild(rankingDiv);
+            
+            try {
+                const globalRanking = await getGlobalRanking();
+                
+                let rankingHTML = '<h2>🏆 Ranking Global de MateMaster 🏆</h2>';
+                
+                if (globalRanking.length === 0) {
+                    rankingHTML += '<p>¡Aún no hay estadísticas! ¡Juega para crear el ranking!</p>';
+                } else {
+                    rankingHTML += '<div style="text-align: left;">';
+                    globalRanking.forEach((player, index) => {
+                        const timeStr = player.totalTime < 60 ? 
+                            `${player.totalTime}s` : 
+                            `${Math.floor(player.totalTime/60)}m ${player.totalTime%60}s`;
+                        
+                        rankingHTML += `
+                            <div style="margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px;">
+                                <h3>${index + 1}. ${player.name}</h3>
+                                <p>⏱️ Tiempo total: ${timeStr}</p>
+                                <p>✅ Correctas: ${player.totalCorrect} | ❌ Incorrectas: ${player.totalIncorrect}</p>
+                                <p>🎯 Niveles completados: ${player.completedLevels}/4</p>
+                            </div>
+                        `;
+                    });
+                    rankingHTML += '</div>';
+                }
+                
+                rankingHTML += `
+                    <br><br>
+                    <button onclick="this.parentElement.remove()" style="
+                        background: white;
+                        color: #ff9a9e;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 10px;
+                        font-size: 1em;
+                        cursor: pointer;
+                        font-family: inherit;
+                        font-weight: bold;
+                    ">Cerrar Ranking</button>
+                `;
+                
+                rankingDiv.innerHTML = rankingHTML;
+            } catch (error) {
+                rankingDiv.innerHTML = `
+                    <h2>🏆 Ranking de MateMaster 🏆</h2>
+                    <p>Error cargando ranking global. Mostrando ranking local.</p>
+                    <button onclick="this.parentElement.remove()" style="
+                        background: white;
+                        color: #ff9a9e;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 10px;
+                        font-size: 1em;
+                        cursor: pointer;
+                        font-family: inherit;
+                        font-weight: bold;
+                    ">Cerrar</button>
+                `;
+            }
         }
 
         function handleKeyPress(event) {
             if (event.key === 'Enter') {
                 startGame();
             }
+        }
+
+        // Función para guardar en servidor global
+        async function saveToGlobalServer(playerName, level, stats) {
+            try {
+                const response = await fetch('http://localhost:3000/api/rankings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        playerName: playerName,
+                        level: level,
+                        stats: stats
+                    })
+                });
+                
+                if (response.ok) {
+                    console.log('Estadísticas guardadas en servidor global');
+                } else {
+                    console.log('Servidor no disponible, guardando solo localmente');
+                }
+            } catch (error) {
+                console.log('Servidor no disponible, guardando solo localmente');
+            }
+        }
+
+        // Función para obtener ranking global
+        async function getGlobalRanking() {
+            try {
+                const response = await fetch('http://localhost:3000/api/rankings');
+                if (response.ok) {
+                    const globalRanking = await response.json();
+                    return globalRanking;
+                } else {
+                    console.log('Servidor no disponible, usando ranking local');
+                    return getLocalRanking();
+                }
+            } catch (error) {
+                console.log('Servidor no disponible, usando ranking local');
+                return getLocalRanking();
+            }
+        }
+
+        // Función para obtener ranking local como fallback
+        function getLocalRanking() {
+            const localStats = JSON.parse(localStorage.getItem('mateMasterStats')) || {};
+            const rankings = [];
+            
+            Object.keys(localStats).forEach(playerName => {
+                const playerData = localStats[playerName];
+                let totalTime = 0;
+                let totalCorrect = 0;
+                let totalIncorrect = 0;
+                let completedLevels = 0;
+                
+                for (let level = 1; level <= 4; level++) {
+                    const levelData = playerData[`level${level}`];
+                    if (levelData && levelData.completed) {
+                        totalTime += levelData.time;
+                        totalCorrect += levelData.correct;
+                        totalIncorrect += levelData.incorrect;
+                        completedLevels++;
+                    }
+                }
+                
+                if (completedLevels > 0) {
+                    rankings.push({
+                        name: playerName,
+                        totalTime,
+                        totalCorrect,
+                        totalIncorrect,
+                        completedLevels
+                    });
+                }
+            });
+            
+            return rankings.sort((a, b) => a.totalTime - b.totalTime);
         }
     </script>
 </body>
