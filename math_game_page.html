@@ -95,6 +95,48 @@
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .question-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="twice" patternUnits="userSpaceOnUse" width="50" height="50"><circle cx="25" cy="25" r="2" fill="%23ff9a9e" opacity="0.1"/><circle cx="75" cy="25" r="2" fill="%23fecfef" opacity="0.1"/><circle cx="25" cy="75" r="2" fill="%23ff9a9e" opacity="0.1"/><circle cx="75" cy="75" r="2" fill="%23fecfef" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23twice)"/></svg>');
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .twice-theme {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef, #ffd1ff);
+            border: 3px solid #ff6b9d;
+            box-shadow: 0 15px 35px rgba(255, 107, 157, 0.3);
+        }
+
+        .twice-theme .question {
+            color: #d63384;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(214, 51, 132, 0.2);
+        }
+
+        .twice-theme .option-btn {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            border: 2px solid #ff4d8d;
+        }
+
+        .twice-theme .option-btn:hover {
+            background: linear-gradient(135deg, #ff4d8d, #ff6b9d);
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 107, 157, 0.4);
+        }
+
+        .twice-theme .final-question {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            border: 2px solid #ff4d8d;
         }
 
         .question {
@@ -378,9 +420,9 @@
                      <strong>OOO GRAN TRINIDAD LA MASTER DE LAS MATEMÁTICAS</strong><br>
                      ¡BIENVENIDA A TU REINO DE LOS NÚMEROS! 🎯✨`;
             } else {
-                const characteristic = getNameCharacteristic(playerName);
-                document.getElementById('playerInfo').innerHTML = 
-                    `🎭 ¡Hola ${playerName}! Tu nombre significa que eres <strong>${characteristic}</strong>. ¡Perfecto para ser un MateMaster!`;
+            const characteristic = getNameCharacteristic(playerName);
+            document.getElementById('playerInfo').innerHTML = 
+                `🎭 ¡Hola ${playerName}! Tu nombre significa que eres <strong>${characteristic}</strong>. ¡Perfecto para ser un MateMaster!`;
             }
 
             document.getElementById('welcomeScreen').style.display = 'none';
@@ -564,105 +606,115 @@
         }
 
         function generateExpertQuestion(isFinal) {
-            const questionTypes = ['divisionWithAverage', 'complexProblem', 'twiceProblem', 'concertProblem'];
+            const questionTypes = ['twiceConcert', 'twiceAlbum', 'twiceTour', 'twiceFans', 'twiceMerch'];
             const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
             
-            if (type === 'divisionWithAverage') {
-                // Generar números que den un promedio divisible exacto
-                const divisor = isFinal ? Math.floor(Math.random() * 4) + 3 : Math.floor(Math.random() * 3) + 2;
-                const targetQuotient = Math.floor(Math.random() * 8) + 3;
-                const targetAverage = divisor * targetQuotient;
+            if (type === 'twiceConcert') {
+                // Problema de conciertos de TWICE
+                const concerts = [200, 350, 450, 280, 320, 400];
+                const concertIndex = Math.floor(Math.random() * concerts.length);
+                const attendees = concerts[concertIndex];
+                const concertNumber = concertIndex + 1;
                 
-                // Generar 3 números que sumen exactamente targetAverage * 3
-                const totalSum = targetAverage * 3;
-                const num1 = Math.floor(Math.random() * 10) + 8;
-                const num2 = Math.floor(Math.random() * 10) + 8;
-                const num3 = totalSum - num1 - num2;
-                
-                const numbers = [num1, num2, num3];
-                const correctAnswer = targetQuotient; // Será siempre entero
-                
-                // Asegurar que las respuestas incorrectas sean diferentes
-                const wrongAnswers = [];
-                const possibleWrong = [
-                    correctAnswer + 1,
-                    correctAnswer - 1,
-                    correctAnswer + 2,
-                    correctAnswer - 2
-                ].filter(x => x > 0 && x !== correctAnswer);
-                
-                // Tomar hasta 3 respuestas incorrectas únicas
-                for (let i = 0; i < Math.min(3, possibleWrong.length); i++) {
-                    wrongAnswers.push(possibleWrong[i]);
-                }
-                
-                // Si no hay suficientes respuestas incorrectas, agregar más
-                while (wrongAnswers.length < 3) {
-                    const extraWrong = correctAnswer + Math.floor(Math.random() * 5) + 1;
-                    if (!wrongAnswers.includes(extraWrong) && extraWrong > 0) {
-                        wrongAnswers.push(extraWrong);
-                    }
-                }
-
-                return {
-                    question: `Si tengo ${numbers.join(', ')} puntos y quiero dividir el promedio entre ${divisor}, ¿cuál es el resultado?`,
-                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
-                    correct: correctAnswer,
-                    isFinal: isFinal
-                };
-            } else if (type === 'twiceProblem') {
-                // Problema temático de TWICE
-                const members = Math.floor(Math.random() * 3) + 7; // 7-9 miembros
-                const totalFans = members * (Math.floor(Math.random() * 100) + 50);
-                const correctAnswer = Math.round(totalFans / members);
-                
+                const correctAnswer = attendees;
                 const wrongAnswers = [
-                    correctAnswer + 1,
-                    correctAnswer - 1,
-                    correctAnswer + 2
+                    attendees + 50,
+                    attendees - 30,
+                    attendees + 100
                 ].filter(x => x > 0);
 
                 return {
-                    question: `En un concierto de TWICE hay ${totalFans} fans y se dividen en ${members} grupos iguales. ¿Cuántos fans hay en cada grupo?`,
+                    question: `En el concierto número ${concertNumber} de TWICE fueron ${attendees} personas. ¿Cuántas personas asistieron?`,
                     options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
                     correct: correctAnswer,
-                    isFinal: isFinal
+                    isFinal: isFinal,
+                    theme: 'twice'
                 };
-            } else if (type === 'concertProblem') {
-                // Problema de concierto
-                const tickets = Math.floor(Math.random() * 20) + 30;
-                const price = Math.floor(Math.random() * 50) + 100;
-                const totalRevenue = tickets * price;
-                const correctAnswer = Math.round(totalRevenue / tickets);
+            } else if (type === 'twiceAlbum') {
+                // Problema de álbumes vendidos
+                const albums = [150000, 200000, 180000, 220000, 160000];
+                const albumIndex = Math.floor(Math.random() * albums.length);
+                const sales = albums[albumIndex];
+                const albumNumber = albumIndex + 1;
                 
+                const correctAnswer = Math.round(sales / 1000); // Convertir a miles
                 const wrongAnswers = [
-                    correctAnswer + 1,
-                    correctAnswer - 1,
-                    correctAnswer + 2
+                    correctAnswer + 10,
+                    correctAnswer - 5,
+                    correctAnswer + 20
                 ].filter(x => x > 0);
 
                 return {
-                    question: `En un concierto se vendieron ${tickets} boletos por $${price} cada uno. ¿Cuál es el precio promedio por boleto?`,
+                    question: `El álbum número ${albumNumber} de TWICE vendió ${sales.toLocaleString()} copias. ¿Cuántos miles de copias vendió?`,
                     options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
                     correct: correctAnswer,
-                    isFinal: isFinal
+                    isFinal: isFinal,
+                    theme: 'twice'
+                };
+            } else if (type === 'twiceTour') {
+                // Problema de giras
+                const cities = [8, 12, 15, 10, 18];
+                const cityIndex = Math.floor(Math.random() * cities.length);
+                const totalFans = cities[cityIndex] * (Math.floor(Math.random() * 5000) + 10000);
+                const fansPerCity = Math.round(totalFans / cities[cityIndex]);
+                
+                const correctAnswer = fansPerCity;
+                const wrongAnswers = [
+                    fansPerCity + 500,
+                    fansPerCity - 300,
+                    fansPerCity + 1000
+                ].filter(x => x > 0);
+
+                return {
+                    question: `En la gira de TWICE visitaron ${cities[cityIndex]} ciudades con ${totalFans.toLocaleString()} fans en total. ¿Cuántos fans promedio por ciudad?`,
+                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+                    correct: correctAnswer,
+                    isFinal: isFinal,
+                    theme: 'twice'
+                };
+            } else if (type === 'twiceFans') {
+                // Problema de fans por país
+                const countries = ['Corea', 'Japón', 'Estados Unidos', 'Tailandia', 'Filipinas'];
+                const countryIndex = Math.floor(Math.random() * countries.length);
+                const fans = Math.floor(Math.random() * 50000) + 10000;
+                const country = countries[countryIndex];
+                
+                const correctAnswer = fans;
+                const wrongAnswers = [
+                    fans + 5000,
+                    fans - 3000,
+                    fans + 10000
+                ].filter(x => x > 0);
+
+                return {
+                    question: `En ${country} hay ${fans.toLocaleString()} ONCE (fans de TWICE). ¿Cuántos fans hay en ${country}?`,
+                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+                    correct: correctAnswer,
+                    isFinal: isFinal,
+                    theme: 'twice'
                 };
             } else {
-                const students = Math.floor(Math.random() * 5) + 8;
-                const totalApples = students * (Math.floor(Math.random() * 4) + 3);
-                const correctAnswer = Math.round(totalApples / students);
+                // Problema de mercancía
+                const items = ['photocards', 'albums', 'lightsticks', 'posters'];
+                const itemIndex = Math.floor(Math.random() * items.length);
+                const item = items[itemIndex];
+                const price = Math.floor(Math.random() * 20) + 10;
+                const quantity = Math.floor(Math.random() * 100) + 50;
+                const totalRevenue = price * quantity;
                 
+                const correctAnswer = Math.round(totalRevenue / quantity);
                 const wrongAnswers = [
-                    correctAnswer + 1,
+                    correctAnswer + 2,
                     correctAnswer - 1,
-                    correctAnswer + 2
-                ];
+                    correctAnswer + 5
+                ].filter(x => x > 0);
 
                 return {
-                    question: `En una clase hay ${students} estudiantes y se reparten ${totalApples} manzanas por igual. ¿Cuántas manzanas recibe cada estudiante?`,
+                    question: `Se vendieron ${quantity} ${item} de TWICE por $${totalRevenue} en total. ¿Cuál es el precio promedio por ${item.slice(0, -1)}?`,
                     options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
                     correct: correctAnswer,
-                    isFinal: isFinal
+                    isFinal: isFinal,
+                    theme: 'twice'
                 };
             }
         }
@@ -679,6 +731,14 @@
         function showQuestion() {
             const question = questions[currentQuestion];
             const questionContainer = document.getElementById('questionContainer');
+            const questionScreen = document.getElementById('questionScreen');
+            
+            // Aplicar tema TWICE si es nivel 4
+            if (currentLevel === 4) {
+                questionScreen.classList.add('twice-theme');
+            } else {
+                questionScreen.classList.remove('twice-theme');
+            }
             
             // Actualizar contador y barra de progreso
             document.getElementById('currentScore').textContent = `Pregunta ${currentQuestion + 1} de 5`;
@@ -688,9 +748,12 @@
             const finalIndicator = question.isFinal ? 
                 '<div class="final-question">⭐ ¡PREGUNTA DECISIVA! ⭐<br>Esta pregunta determina si pasas al siguiente nivel</div>' : '';
             
+            // Agregar emojis TWICE para nivel 4
+            const twiceEmojis = currentLevel === 4 ? '💖 🎵 💖 ' : '';
+            
             questionContainer.innerHTML = `
                 ${finalIndicator}
-                <div class="question">${question.question}</div>
+                <div class="question">${twiceEmojis}${question.question}${twiceEmojis}</div>
                 <div class="options" id="optionsContainer">
                     ${question.options.map((option, index) => 
                         `<button class="option-btn" onclick="selectAnswer('${option}', ${index})">${option}</button>`
@@ -734,9 +797,9 @@
                 currentStats.incorrect++;
                 playIncorrectSound();
                 if (question.isFinal) {
-                    setTimeout(() => {
+                setTimeout(() => {
                         showInfoMessage('😅 No pasaste la pregunta decisiva. ¡Inténtalo de nuevo!');
-                    }, 1000);
+                }, 1000);
                 }
             }
             
