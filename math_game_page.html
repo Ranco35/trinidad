@@ -271,6 +271,55 @@
         .bounce {
             animation: bounce 1s;
         }
+
+        .ranking-section {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .top-players {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-rank {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .player-info {
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .player-name {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .player-stats {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -296,9 +345,16 @@
             </div>
             
             <button class="btn" onclick="startGame()">¡Comenzar Aventura!</button>
-            <button class="btn" onclick="showRanking()" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">🏆 Ranking Local</button>
-            <button class="btn" onclick="showGlobalRanking()" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">🌍 Ranking Global</button>
             <button class="btn" onclick="resetProgress()" style="background: linear-gradient(135deg, #f56565, #e53e3e);">🔄 Reiniciar Progreso</button>
+        </div>
+        
+        <!-- Ranking global al inicio -->
+        <div id="globalRanking" class="ranking-section">
+            <h3>🏆 Top 5 Jugadores</h3>
+            <div id="topPlayers" class="top-players">
+                <div class="loading">Cargando ranking...</div>
+            </div>
+        </div>
         </div>
 
         <!-- Pantalla Principal del Juego -->
@@ -1024,89 +1080,7 @@
             }
         }
 
-        async function showRanking() {
-            const rankingDiv = document.createElement('div');
-            rankingDiv.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: linear-gradient(135deg, #ff9a9e, #fecfef);
-                color: white;
-                padding: 30px;
-                border-radius: 20px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                z-index: 1000;
-                text-align: center;
-                max-width: 600px;
-                max-height: 80vh;
-                overflow-y: auto;
-                font-size: 1.1em;
-            `;
-            
-            rankingDiv.innerHTML = '<h2>🏆 Cargando Ranking Global... 🏆</h2><p>⏳</p>';
-            document.body.appendChild(rankingDiv);
-            
-            try {
-                const globalRanking = await getGlobalRanking();
-                
-                let rankingHTML = '<h2>🏆 Ranking Global de MateMaster 🏆</h2>';
-                
-                if (globalRanking.length === 0) {
-                    rankingHTML += '<p>¡Aún no hay estadísticas! ¡Juega para crear el ranking!</p>';
-                } else {
-                    rankingHTML += '<div style="text-align: left;">';
-                    globalRanking.forEach((player, index) => {
-                        const timeStr = player.totalTime < 60 ? 
-                            `${player.totalTime}s` : 
-                            `${Math.floor(player.totalTime/60)}m ${player.totalTime%60}s`;
-                        
-                        rankingHTML += `
-                            <div style="margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px;">
-                                <h3>${index + 1}. ${player.name}</h3>
-                                <p>⏱️ Tiempo total: ${timeStr}</p>
-                                <p>✅ Correctas: ${player.totalCorrect} | ❌ Incorrectas: ${player.totalIncorrect}</p>
-                                <p>🎯 Niveles completados: ${player.completedLevels}/4</p>
-                            </div>
-                        `;
-                    });
-                    rankingHTML += '</div>';
-                }
-                
-                rankingHTML += `
-                    <br><br>
-                    <button onclick="this.parentElement.remove()" style="
-                        background: white;
-                        color: #ff9a9e;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 10px;
-                        font-size: 1em;
-                        cursor: pointer;
-                        font-family: inherit;
-                        font-weight: bold;
-                    ">Cerrar Ranking</button>
-                `;
-                
-                rankingDiv.innerHTML = rankingHTML;
-            } catch (error) {
-                rankingDiv.innerHTML = `
-                    <h2>🏆 Ranking de MateMaster 🏆</h2>
-                    <p>Error cargando ranking global. Mostrando ranking local.</p>
-                    <button onclick="this.parentElement.remove()" style="
-                        background: white;
-                        color: #ff9a9e;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 10px;
-                        font-size: 1em;
-                        cursor: pointer;
-                        font-family: inherit;
-                        font-weight: bold;
-                    ">Cerrar</button>
-                `;
-            }
-        }
+
 
         function handleKeyPress(event) {
             if (event.key === 'Enter') {
@@ -1201,6 +1175,62 @@
             
             return rankings.sort((a, b) => a.totalTime - b.totalTime);
         }
+
+        // Función para cargar los top 5 jugadores al inicio
+        async function loadTopPlayers() {
+            try {
+                const rankings = await getGlobalRanking();
+                const topPlayersContainer = document.getElementById('topPlayers');
+                
+                if (rankings.length === 0) {
+                    topPlayersContainer.innerHTML = '<div class="loading">No hay jugadores aún. ¡Sé el primero!</div>';
+                    return;
+                }
+                
+                const top5 = rankings.slice(0, 5);
+                let html = '';
+                
+                top5.forEach((player, index) => {
+                    const rank = index + 1;
+                    const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏅';
+                    const timeFormatted = formatTime(player.totalTime);
+                    
+                    html += `
+                        <div class="player-card">
+                            <div class="player-rank">${rankEmoji}</div>
+                            <div class="player-info">
+                                <div class="player-name">${player.name}</div>
+                                <div class="player-stats">
+                                    ⏱️ ${timeFormatted} | ✅ ${player.totalCorrect} | ❌ ${player.totalIncorrect} | 🎯 ${player.completedLevels} niveles
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                topPlayersContainer.innerHTML = html;
+            } catch (error) {
+                document.getElementById('topPlayers').innerHTML = '<div class="loading">Error cargando ranking</div>';
+            }
+        }
+
+        // Función para formatear tiempo
+        function formatTime(seconds) {
+            if (seconds < 60) {
+                return `${seconds}s`;
+            } else if (seconds < 3600) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes}m ${remainingSeconds}s`;
+            } else {
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                return `${hours}h ${minutes}m`;
+            }
+        }
+
+        // Cargar ranking al inicio
+        loadTopPlayers();
     </script>
 </body>
 </html>
