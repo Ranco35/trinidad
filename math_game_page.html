@@ -232,8 +232,11 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎯 MateMaster</h1>
-            <p>¡Domina las divisiones y promedios!</p>
+            <h1>🎯 MateMaster TWICE Edition</h1>
+            <p>✨ ¡Domina las divisiones y promedios con el poder de TWICE! ✨</p>
+            <div style="margin: 10px 0; font-size: 1.2em;">
+                🎵 💖 🎵 💖 🎵 💖 🎵
+            </div>
             <small style="font-size: 0.7em; color: #666; font-style: italic;">hecho por Trinidad Proboste</small>
         </div>
 
@@ -249,6 +252,7 @@
             </div>
             
             <button class="btn" onclick="startGame()">¡Comenzar Aventura!</button>
+            <button class="btn" onclick="showRanking()" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">🏆 Ver Ranking</button>
             <button class="btn" onclick="resetProgress()" style="background: linear-gradient(135deg, #f56565, #e53e3e);">🔄 Reiniciar Progreso</button>
         </div>
 
@@ -319,6 +323,9 @@
         let playerName = '';
         let levelScores = JSON.parse(localStorage.getItem('mateMasterScores')) || [0, 0, 0, 0]; // Puntuaciones por nivel
         let unlockedLevels = parseInt(localStorage.getItem('mateMasterUnlockedLevels')) || 1; // Niveles desbloqueados
+        let startTime = 0; // Tiempo de inicio del nivel
+        let levelStats = JSON.parse(localStorage.getItem('mateMasterStats')) || {}; // Estadísticas por jugador
+        let currentStats = { correct: 0, incorrect: 0, time: 0 }; // Estadísticas del nivel actual
 
         const nameCharacteristics = {
             'a': 'ambicioso/a y aventurero/a',
@@ -413,6 +420,8 @@
             currentLevel = level;
             currentQuestion = 0;
             score = 0;
+            startTime = Date.now(); // Iniciar cronómetro
+            currentStats = { correct: 0, incorrect: 0, time: 0 }; // Resetear estadísticas
             generateQuestions(level);
             
             document.getElementById('gameScreen').style.display = 'none';
@@ -555,7 +564,7 @@
         }
 
         function generateExpertQuestion(isFinal) {
-            const questionTypes = ['divisionWithAverage', 'complexProblem'];
+            const questionTypes = ['divisionWithAverage', 'complexProblem', 'twiceProblem', 'concertProblem'];
             const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
             
             if (type === 'divisionWithAverage') {
@@ -597,6 +606,43 @@
 
                 return {
                     question: `Si tengo ${numbers.join(', ')} puntos y quiero dividir el promedio entre ${divisor}, ¿cuál es el resultado?`,
+                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+                    correct: correctAnswer,
+                    isFinal: isFinal
+                };
+            } else if (type === 'twiceProblem') {
+                // Problema temático de TWICE
+                const members = Math.floor(Math.random() * 3) + 7; // 7-9 miembros
+                const totalFans = members * (Math.floor(Math.random() * 100) + 50);
+                const correctAnswer = Math.round(totalFans / members);
+                
+                const wrongAnswers = [
+                    correctAnswer + 1,
+                    correctAnswer - 1,
+                    correctAnswer + 2
+                ].filter(x => x > 0);
+
+                return {
+                    question: `En un concierto de TWICE hay ${totalFans} fans y se dividen en ${members} grupos iguales. ¿Cuántos fans hay en cada grupo?`,
+                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+                    correct: correctAnswer,
+                    isFinal: isFinal
+                };
+            } else if (type === 'concertProblem') {
+                // Problema de concierto
+                const tickets = Math.floor(Math.random() * 20) + 30;
+                const price = Math.floor(Math.random() * 50) + 100;
+                const totalRevenue = tickets * price;
+                const correctAnswer = Math.round(totalRevenue / tickets);
+                
+                const wrongAnswers = [
+                    correctAnswer + 1,
+                    correctAnswer - 1,
+                    correctAnswer + 2
+                ].filter(x => x > 0);
+
+                return {
+                    question: `En un concierto se vendieron ${tickets} boletos por $${price} cada uno. ¿Cuál es el precio promedio por boleto?`,
                     options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
                     correct: correctAnswer,
                     isFinal: isFinal
@@ -677,6 +723,7 @@
             // Verificar respuesta y reproducir sonido
             if (selectedAnswer === question.correct.toString()) {
                 score++;
+                currentStats.correct++;
                 playCorrectSound();
                 if (question.isFinal) {
                     setTimeout(() => {
@@ -684,6 +731,7 @@
                     }, 1000);
                 }
             } else {
+                currentStats.incorrect++;
                 playIncorrectSound();
                 if (question.isFinal) {
                     setTimeout(() => {
@@ -753,10 +801,28 @@
             const finalQuestionCorrect = questions[4].correct.toString() === 
                 document.querySelector('.option-btn.correct')?.textContent;
             
+            // Calcular tiempo del nivel
+            const endTime = Date.now();
+            const timeSpent = Math.round((endTime - startTime) / 1000); // Tiempo en segundos
+            currentStats.time = timeSpent;
+            
             levelScores[currentLevel - 1] = score;
+            
+            // Guardar estadísticas del jugador
+            if (!levelStats[playerName]) {
+                levelStats[playerName] = {};
+            }
+            levelStats[playerName][`level${currentLevel}`] = {
+                time: timeSpent,
+                correct: currentStats.correct,
+                incorrect: currentStats.incorrect,
+                score: score,
+                completed: score >= 3 && finalQuestionCorrect
+            };
             
             // Guardar datos en localStorage
             localStorage.setItem('mateMasterScores', JSON.stringify(levelScores));
+            localStorage.setItem('mateMasterStats', JSON.stringify(levelStats));
             
             if (score >= 3 && finalQuestionCorrect) {
                 if (currentLevel < 4) {
@@ -764,11 +830,11 @@
                     localStorage.setItem('mateMasterUnlockedLevels', unlockedLevels.toString());
                 }
                 showSuccessMessage(`🎉 ¡Felicitaciones ${playerName}! 
-                       Completaste el nivel ${currentLevel} con ${score}/5 puntos.
+                       Completaste el nivel ${currentLevel} con ${score}/5 puntos en ${timeSpent} segundos.
                        ${currentLevel < 4 ? '¡Siguiente nivel desbloqueado!' : '¡Has completado todos los niveles!'}`);
             } else {
                 let message = `😊 Buen intento ${playerName}. 
-                       Obtuviste ${score}/5 puntos en el nivel ${currentLevel}.`;
+                       Obtuviste ${score}/5 puntos en el nivel ${currentLevel} en ${timeSpent} segundos.`;
                 
                 if (!finalQuestionCorrect) {
                     message += ' Necesitas pasar la pregunta decisiva para avanzar.';
@@ -867,9 +933,100 @@
                 unlockedLevels = 1;
                 localStorage.removeItem('mateMasterScores');
                 localStorage.removeItem('mateMasterUnlockedLevels');
+                localStorage.removeItem('mateMasterStats');
+                levelStats = {};
                 updateLevelCards();
                 showSuccessMessage('🔄 Progreso reiniciado. ¡Comienza de nuevo!');
             }
+        }
+
+        function showRanking() {
+            const rankingDiv = document.createElement('div');
+            rankingDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #ff9a9e, #fecfef);
+                color: white;
+                padding: 30px;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 1000;
+                text-align: center;
+                max-width: 600px;
+                max-height: 80vh;
+                overflow-y: auto;
+                font-size: 1.1em;
+            `;
+            
+            let rankingHTML = '<h2>🏆 Ranking de MateMaster 🏆</h2>';
+            
+            if (Object.keys(levelStats).length === 0) {
+                rankingHTML += '<p>¡Aún no hay estadísticas! ¡Juega para crear el ranking!</p>';
+            } else {
+                // Ordenar jugadores por tiempo total
+                const players = Object.keys(levelStats);
+                const playerStats = players.map(player => {
+                    let totalTime = 0;
+                    let totalCorrect = 0;
+                    let totalIncorrect = 0;
+                    let completedLevels = 0;
+                    
+                    for (let level = 1; level <= 4; level++) {
+                        const levelData = levelStats[player][`level${level}`];
+                        if (levelData && levelData.completed) {
+                            totalTime += levelData.time;
+                            totalCorrect += levelData.correct;
+                            totalIncorrect += levelData.incorrect;
+                            completedLevels++;
+                        }
+                    }
+                    
+                    return {
+                        name: player,
+                        totalTime,
+                        totalCorrect,
+                        totalIncorrect,
+                        completedLevels
+                    };
+                }).filter(p => p.completedLevels > 0).sort((a, b) => a.totalTime - b.totalTime);
+                
+                rankingHTML += '<div style="text-align: left;">';
+                playerStats.forEach((player, index) => {
+                    const timeStr = player.totalTime < 60 ? 
+                        `${player.totalTime}s` : 
+                        `${Math.floor(player.totalTime/60)}m ${player.totalTime%60}s`;
+                    
+                    rankingHTML += `
+                        <div style="margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px;">
+                            <h3>${index + 1}. ${player.name}</h3>
+                            <p>⏱️ Tiempo total: ${timeStr}</p>
+                            <p>✅ Correctas: ${player.totalCorrect} | ❌ Incorrectas: ${player.totalIncorrect}</p>
+                            <p>🎯 Niveles completados: ${player.completedLevels}/4</p>
+                        </div>
+                    `;
+                });
+                rankingHTML += '</div>';
+            }
+            
+            rankingHTML += `
+                <br><br>
+                <button onclick="this.parentElement.remove()" style="
+                    background: white;
+                    color: #ff9a9e;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    font-size: 1em;
+                    cursor: pointer;
+                    font-family: inherit;
+                    font-weight: bold;
+                ">Cerrar Ranking</button>
+            `;
+            
+            rankingDiv.innerHTML = rankingHTML;
+            document.body.appendChild(rankingDiv);
         }
 
         function handleKeyPress(event) {
