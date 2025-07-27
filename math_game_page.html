@@ -488,18 +488,58 @@
         }
 
         function generateAverageQuestion(isFinal) {
-            const numbers = isFinal ? 
-                [Math.floor(Math.random() * 20) + 10, Math.floor(Math.random() * 20) + 10, Math.floor(Math.random() * 20) + 10, Math.floor(Math.random() * 20) + 10] :
-                [Math.floor(Math.random() * 10) + 5, Math.floor(Math.random() * 10) + 5, Math.floor(Math.random() * 10) + 5];
+            // Generar números que den un promedio entero exacto
+            let numbers;
+            let correctAnswer;
+            
+            if (isFinal) {
+                // Para preguntas finales, usar 4 números
+                const baseNumber = Math.floor(Math.random() * 12) + 8;
+                // Asegurar que la suma sea divisible por 4
+                const targetSum = baseNumber * 4;
+                numbers = [
+                    baseNumber,
+                    baseNumber + Math.floor(Math.random() * 4) - 2,
+                    baseNumber + Math.floor(Math.random() * 4) - 2,
+                    targetSum - baseNumber - (baseNumber + Math.floor(Math.random() * 4) - 2) - (baseNumber + Math.floor(Math.random() * 4) - 2)
+                ];
+            } else {
+                // Para preguntas normales, usar 3 números
+                const baseNumber = Math.floor(Math.random() * 8) + 6;
+                // Asegurar que la suma sea divisible por 3
+                const targetSum = baseNumber * 3;
+                numbers = [
+                    baseNumber,
+                    baseNumber + Math.floor(Math.random() * 4) - 2,
+                    targetSum - baseNumber - (baseNumber + Math.floor(Math.random() * 4) - 2)
+                ];
+            }
             
             const sum = numbers.reduce((a, b) => a + b, 0);
-            const correctAnswer = Math.round(sum / numbers.length);
+            correctAnswer = sum / numbers.length; // Ahora será siempre entero
             
-            const wrongAnswers = [
+            // Asegurar que las respuestas incorrectas sean diferentes
+            const wrongAnswers = [];
+            const possibleWrong = [
                 correctAnswer + 1,
                 correctAnswer - 1,
-                correctAnswer + 2
-            ].filter(x => x > 0);
+                correctAnswer + 2,
+                correctAnswer - 2,
+                correctAnswer + 3
+            ].filter(x => x > 0 && x !== correctAnswer);
+            
+            // Tomar hasta 3 respuestas incorrectas únicas
+            for (let i = 0; i < Math.min(3, possibleWrong.length); i++) {
+                wrongAnswers.push(possibleWrong[i]);
+            }
+            
+            // Si no hay suficientes respuestas incorrectas, agregar más
+            while (wrongAnswers.length < 3) {
+                const extraWrong = correctAnswer + Math.floor(Math.random() * 5) + 1;
+                if (!wrongAnswers.includes(extraWrong) && extraWrong > 0) {
+                    wrongAnswers.push(extraWrong);
+                }
+            }
 
             return {
                 question: `¿Cuál es el promedio de ${numbers.join(', ')}?`,
@@ -514,17 +554,41 @@
             const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
             
             if (type === 'divisionWithAverage') {
-                const numbers = [Math.floor(Math.random() * 30) + 20, Math.floor(Math.random() * 30) + 20, Math.floor(Math.random() * 30) + 20];
-                const divisor = isFinal ? Math.floor(Math.random() * 5) + 4 : Math.floor(Math.random() * 3) + 3;
-                const sum = numbers.reduce((a, b) => a + b, 0);
-                const average = sum / numbers.length;
-                const correctAnswer = Math.round(average / divisor);
+                // Generar números que den un promedio divisible exacto
+                const divisor = isFinal ? Math.floor(Math.random() * 4) + 3 : Math.floor(Math.random() * 3) + 2;
+                const targetQuotient = Math.floor(Math.random() * 8) + 3;
+                const targetAverage = divisor * targetQuotient;
                 
-                const wrongAnswers = [
+                // Generar 3 números que sumen exactamente targetAverage * 3
+                const totalSum = targetAverage * 3;
+                const num1 = Math.floor(Math.random() * 10) + 8;
+                const num2 = Math.floor(Math.random() * 10) + 8;
+                const num3 = totalSum - num1 - num2;
+                
+                const numbers = [num1, num2, num3];
+                const correctAnswer = targetQuotient; // Será siempre entero
+                
+                // Asegurar que las respuestas incorrectas sean diferentes
+                const wrongAnswers = [];
+                const possibleWrong = [
                     correctAnswer + 1,
                     correctAnswer - 1,
-                    correctAnswer + 2
-                ].filter(x => x > 0);
+                    correctAnswer + 2,
+                    correctAnswer - 2
+                ].filter(x => x > 0 && x !== correctAnswer);
+                
+                // Tomar hasta 3 respuestas incorrectas únicas
+                for (let i = 0; i < Math.min(3, possibleWrong.length); i++) {
+                    wrongAnswers.push(possibleWrong[i]);
+                }
+                
+                // Si no hay suficientes respuestas incorrectas, agregar más
+                while (wrongAnswers.length < 3) {
+                    const extraWrong = correctAnswer + Math.floor(Math.random() * 5) + 1;
+                    if (!wrongAnswers.includes(extraWrong) && extraWrong > 0) {
+                        wrongAnswers.push(extraWrong);
+                    }
+                }
 
                 return {
                     question: `Si tengo ${numbers.join(', ')} puntos y quiero dividir el promedio entre ${divisor}, ¿cuál es el resultado?`,
@@ -605,23 +669,67 @@
                 }
             });
             
-            // Verificar respuesta
+            // Verificar respuesta y reproducir sonido
             if (selectedAnswer === question.correct.toString()) {
                 score++;
+                playCorrectSound();
                 if (question.isFinal) {
                     setTimeout(() => {
                         showSuccessMessage('🎉 ¡EXCELENTE! Has pasado la pregunta decisiva. ¡Nivel completado!');
                     }, 1000);
                 }
-            } else if (question.isFinal) {
-                setTimeout(() => {
-                    showInfoMessage('😅 No pasaste la pregunta decisiva. ¡Inténtalo de nuevo!');
-                }, 1000);
+            } else {
+                playIncorrectSound();
+                if (question.isFinal) {
+                    setTimeout(() => {
+                        showInfoMessage('😅 No pasaste la pregunta decisiva. ¡Inténtalo de nuevo!');
+                    }, 1000);
+                }
             }
             
             setTimeout(() => {
                 document.getElementById('nextBtn').style.display = 'inline-block';
             }, 2000);
+        }
+
+        // Función para reproducir sonido correcto
+        function playCorrectSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(1200, audioContext.currentTime + 0.2);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        // Función para reproducir sonido incorrecto
+        function playIncorrectSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(300, audioContext.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(200, audioContext.currentTime + 0.2);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
         }
 
         function nextQuestion() {
