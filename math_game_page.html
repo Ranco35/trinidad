@@ -665,209 +665,141 @@
         }
 
         function generateExpertQuestion(isFinal) {
-            const questionTypes = ['twiceConcert', 'twiceAlbum', 'twiceTour', 'twiceFans', 'twiceMerch', 'twiceAwards', 'twiceViews'];
+            const questionTypes = ['simple', 'medium', 'advanced'];
             const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
             
-            if (type === 'twiceConcert') {
-                // Problema de promedio de asistentes a múltiples conciertos
-                const concerts = [];
-                const numConcerts = Math.floor(Math.random() * 3) + 3; // 3-5 conciertos
-                let totalAttendees = 0;
-                
-                for (let i = 0; i < numConcerts; i++) {
-                    const attendees = Math.floor(Math.random() * 800) + 400; // 400-1200 por concierto
-                    concerts.push(attendees);
-                    totalAttendees += attendees;
-                }
-                
-                const correctAnswer = Math.round(totalAttendees / numConcerts);
-                const wrongAnswers = [
-                    Math.round(totalAttendees / (numConcerts + 1)),
-                    Math.round(totalAttendees / (numConcerts - 1)),
-                    Math.round((totalAttendees + 100) / numConcerts)
-                ].filter(x => x > 0);
-
-                return {
-                    question: `TWICE dio ${numConcerts} conciertos con ${concerts.join(', ')} asistentes respectivamente. ¿Cuál es el promedio de asistentes por concierto?`,
-                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
-                    correct: correctAnswer,
-                    isFinal: isFinal,
-                    theme: 'twice'
-                };
-            } else if (type === 'twiceAlbum') {
-                // Problema de promedio de ventas de múltiples álbumes
-                const albums = [];
-                const numAlbums = Math.floor(Math.random() * 3) + 2; // 2-4 álbumes
-                let totalSales = 0;
-                
-                for (let i = 0; i < numAlbums; i++) {
-                    const sales = Math.floor(Math.random() * 500000) + 300000; // 300k-800k por álbum
-                    albums.push(sales);
-                    totalSales += sales;
-                }
-                
-                const correctAnswer = Math.round(totalSales / numAlbums);
-                const wrongAnswers = [
-                    Math.round(totalSales / (numAlbums + 1)),
-                    Math.round(totalSales / (numAlbums - 1)),
-                    Math.round((totalSales + 100000) / numAlbums)
-                ].filter(x => x > 0);
-
-                return {
-                    question: `Los últimos ${numAlbums} álbumes de TWICE vendieron ${albums.map(s => s.toLocaleString()).join(', ')} copias respectivamente. ¿Cuál es el promedio de ventas por álbum?`,
-                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
-                    correct: correctAnswer,
-                    isFinal: isFinal,
-                    theme: 'twice'
-                };
-            } else if (type === 'twiceTour') {
-                // Problema de promedio de fans por ciudad en diferentes países
-                const countries = ['Corea', 'Japón', 'Estados Unidos', 'Tailandia', 'Filipinas', 'México', 'Brasil'];
-                const numCountries = Math.floor(Math.random() * 3) + 3; // 3-5 países
-                const selectedCountries = [];
-                const fansPerCountry = [];
-                let totalFans = 0;
-                
-                for (let i = 0; i < numCountries; i++) {
-                    const country = countries[Math.floor(Math.random() * countries.length)];
-                    const fans = Math.floor(Math.random() * 800) + 200; // 200-1000 fans por país
-                    selectedCountries.push(country);
-                    fansPerCountry.push(fans);
-                    totalFans += fans;
-                }
-                
-                const correctAnswer = Math.round(totalFans / numCountries);
-                const wrongAnswers = [
-                    Math.round(totalFans / (numCountries + 1)),
-                    Math.round(totalFans / (numCountries - 1)),
-                    Math.round((totalFans + 100) / numCountries)
-                ].filter(x => x > 0);
-
-                return {
-                    question: `En ${selectedCountries.join(', ')} hay ${fansPerCountry.join(', ')} ONCE respectivamente. ¿Cuál es el promedio de fans por país?`,
-                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
-                    correct: correctAnswer,
-                    isFinal: isFinal,
-                    theme: 'twice'
-                };
-            } else if (type === 'twiceFans') {
-                // Problema de promedio de fans por ciudad en un país específico
-                const cities = ['Seúl', 'Busan', 'Incheon', 'Daegu', 'Daejeon', 'Gwangju', 'Suwon'];
-                const numCities = Math.floor(Math.random() * 3) + 3; // 3-5 ciudades
-                const selectedCities = [];
-                const fansPerCity = [];
-                let totalFans = 0;
-                
-                for (let i = 0; i < numCities; i++) {
-                    const city = cities[Math.floor(Math.random() * cities.length)];
-                    const fans = Math.floor(Math.random() * 600) + 100; // 100-700 fans por ciudad
-                    selectedCities.push(city);
-                    fansPerCity.push(fans);
-                    totalFans += fans;
-                }
-                
-                const correctAnswer = Math.round(totalFans / numCities);
-                const wrongAnswers = [
-                    Math.round(totalFans / (numCities + 1)),
-                    Math.round(totalFans / (numCities - 1)),
-                    Math.round((totalFans + 50) / numCities)
-                ].filter(x => x > 0);
-
-                return {
-                    question: `En las ciudades ${selectedCities.join(', ')} hay ${fansPerCity.join(', ')} ONCE respectivamente. ¿Cuál es el promedio de fans por ciudad?`,
-                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
-                    correct: correctAnswer,
-                    isFinal: isFinal,
-                    theme: 'twice'
-                };
-            } else if (type === 'twiceMerch') {
-                // Problema de promedio de precios de diferentes productos
-                const products = ['photocards', 'albums', 'lightsticks', 'posters', 'hoodies', 't-shirts'];
-                const numProducts = Math.floor(Math.random() * 3) + 3; // 3-5 productos
-                const selectedProducts = [];
-                const prices = [];
-                let totalPrice = 0;
-                
-                for (let i = 0; i < numProducts; i++) {
-                    const product = products[Math.floor(Math.random() * products.length)];
-                    const price = Math.floor(Math.random() * 80) + 20; // $20-$100 por producto
-                    selectedProducts.push(product);
-                    prices.push(price);
-                    totalPrice += price;
-                }
-                
-                const correctAnswer = Math.round(totalPrice / numProducts);
-                const wrongAnswers = [
-                    Math.round(totalPrice / (numProducts + 1)),
-                    Math.round(totalPrice / (numProducts - 1)),
-                    Math.round((totalPrice + 10) / numProducts)
-                ].filter(x => x > 0);
-
-                return {
-                    question: `Los productos ${selectedProducts.join(', ')} cuestan $${prices.join(', $')} respectivamente. ¿Cuál es el precio promedio por producto?`,
-                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
-                    correct: correctAnswer,
-                    isFinal: isFinal,
-                    theme: 'twice'
-                };
-            } else if (type === 'twiceAwards') {
-                // Problema de promedio de premios por año
-                const years = [];
-                const awards = [];
-                const numYears = Math.floor(Math.random() * 3) + 3; // 3-5 años
-                let totalAwards = 0;
-                
-                for (let i = 0; i < numYears; i++) {
-                    const year = 2019 + i;
-                    const awardCount = Math.floor(Math.random() * 15) + 5; // 5-20 premios por año
-                    years.push(year);
-                    awards.push(awardCount);
-                    totalAwards += awardCount;
-                }
-                
-                const correctAnswer = Math.round(totalAwards / numYears);
-                const wrongAnswers = [
-                    Math.round(totalAwards / (numYears + 1)),
-                    Math.round(totalAwards / (numYears - 1)),
-                    Math.round((totalAwards + 5) / numYears)
-                ].filter(x => x > 0);
-
-                return {
-                    question: `En los años ${years.join(', ')} TWICE ganó ${awards.join(', ')} premios respectivamente. ¿Cuál es el promedio de premios por año?`,
-                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
-                    correct: correctAnswer,
-                    isFinal: isFinal,
-                    theme: 'twice'
-                };
-            } else {
-                // Problema de promedio de vistas de videos
-                const videos = [];
-                const views = [];
-                const numVideos = Math.floor(Math.random() * 3) + 3; // 3-5 videos
-                let totalViews = 0;
-                
-                for (let i = 0; i < numVideos; i++) {
-                    const viewCount = Math.floor(Math.random() * 50000000) + 10000000; // 10M-60M vistas
-                    videos.push(`video ${i + 1}`);
-                    views.push(viewCount);
-                    totalViews += viewCount;
-                }
-                
-                const correctAnswer = Math.round(totalViews / numVideos);
-                const wrongAnswers = [
-                    Math.round(totalViews / (numVideos + 1)),
-                    Math.round(totalViews / (numVideos - 1)),
-                    Math.round((totalViews + 1000000) / numVideos)
-                ].filter(x => x > 0);
-
-                return {
-                    question: `Los videos ${videos.join(', ')} tienen ${views.map(v => v.toLocaleString()).join(', ')} vistas respectivamente. ¿Cuál es el promedio de vistas por video?`,
-                    options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
-                    correct: correctAnswer,
-                    isFinal: isFinal,
-                    theme: 'twice'
-                };
+            switch (type) {
+                case 'simple':
+                    return generateSimpleAverageQuestion(isFinal);
+                case 'medium':
+                    return generateMediumAverageQuestion(isFinal);
+                case 'advanced':
+                    return generateAdvancedAverageQuestion(isFinal);
+                default:
+                    return generateSimpleAverageQuestion(isFinal);
             }
+        }
+
+        // Preguntas simples: 2-3 números, resultados < 50
+        function generateSimpleAverageQuestion(isFinal) {
+            const numCount = Math.floor(Math.random() * 2) + 2; // 2-3 números
+            const numbers = [];
+            let sum = 0;
+            
+            for (let i = 0; i < numCount; i++) {
+                const num = Math.floor(Math.random() * 20) + 5; // 5-25
+                numbers.push(num);
+                sum += num;
+            }
+            
+            const correctAnswer = Math.round(sum / numCount);
+            
+            // Asegurar que el resultado sea entero y razonable
+            if (correctAnswer > 30 || correctAnswer < 5) {
+                return generateSimpleAverageQuestion(isFinal);
+            }
+            
+            const wrongAnswers = generateWrongAnswers(correctAnswer, 3);
+            
+            return {
+                question: `¿Cuál es el promedio de ${numbers.join(', ')}?`,
+                options: shuffleArray([correctAnswer, ...wrongAnswers]),
+                correct: correctAnswer,
+                isFinal: isFinal,
+                theme: 'twice'
+            };
+        }
+
+        // Preguntas medias: 3-4 números, resultados < 100
+        function generateMediumAverageQuestion(isFinal) {
+            const numCount = Math.floor(Math.random() * 2) + 3; // 3-4 números
+            const numbers = [];
+            let sum = 0;
+            
+            for (let i = 0; i < numCount; i++) {
+                const num = Math.floor(Math.random() * 40) + 10; // 10-50
+                numbers.push(num);
+                sum += num;
+            }
+            
+            const correctAnswer = Math.round(sum / numCount);
+            
+            // Asegurar que el resultado sea entero y razonable
+            if (correctAnswer > 80 || correctAnswer < 15) {
+                return generateMediumAverageQuestion(isFinal);
+            }
+            
+            const wrongAnswers = generateWrongAnswers(correctAnswer, 3);
+            
+            return {
+                question: `¿Cuál es el promedio de ${numbers.join(', ')}?`,
+                options: shuffleArray([correctAnswer, ...wrongAnswers]),
+                correct: correctAnswer,
+                isFinal: isFinal,
+                theme: 'twice'
+            };
+        }
+
+        // Preguntas avanzadas: 4-5 números, resultados < 200
+        function generateAdvancedAverageQuestion(isFinal) {
+            const numCount = Math.floor(Math.random() * 2) + 4; // 4-5 números
+            const numbers = [];
+            let sum = 0;
+            
+            for (let i = 0; i < numCount; i++) {
+                const num = Math.floor(Math.random() * 60) + 20; // 20-80
+                numbers.push(num);
+                sum += num;
+            }
+            
+            const correctAnswer = Math.round(sum / numCount);
+            
+            // Asegurar que el resultado sea entero y razonable
+            if (correctAnswer > 150 || correctAnswer < 25) {
+                return generateAdvancedAverageQuestion(isFinal);
+            }
+            
+            const wrongAnswers = generateWrongAnswers(correctAnswer, 3);
+            
+            return {
+                question: `¿Cuál es el promedio de ${numbers.join(', ')}?`,
+                options: shuffleArray([correctAnswer, ...wrongAnswers]),
+                correct: correctAnswer,
+                isFinal: isFinal,
+                theme: 'twice'
+            };
+        }
+
+        // Generar respuestas incorrectas apropiadas
+        function generateWrongAnswers(correctAnswer, count) {
+            const wrongAnswers = [];
+            const possibleWrongs = [
+                correctAnswer + 1,
+                correctAnswer - 1,
+                correctAnswer + 2,
+                correctAnswer - 2,
+                correctAnswer + 3,
+                correctAnswer - 3,
+                Math.round(correctAnswer * 1.2),
+                Math.round(correctAnswer * 0.8)
+            ].filter(x => x > 0 && x !== correctAnswer);
+            
+            // Tomar hasta 'count' respuestas incorrectas únicas
+            for (let i = 0; i < Math.min(count, possibleWrongs.length); i++) {
+                if (!wrongAnswers.includes(possibleWrongs[i])) {
+                    wrongAnswers.push(possibleWrongs[i]);
+                }
+            }
+            
+            // Si no hay suficientes, agregar más
+            while (wrongAnswers.length < count) {
+                const extraWrong = correctAnswer + Math.floor(Math.random() * 10) + 1;
+                if (!wrongAnswers.includes(extraWrong) && extraWrong > 0) {
+                    wrongAnswers.push(extraWrong);
+                }
+            }
+            
+            return wrongAnswers.slice(0, count);
         }
 
         function shuffleArray(array) {
