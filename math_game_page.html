@@ -18,35 +18,51 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+            margin: 0;
+            padding: 0;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 30px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .header {
             text-align: center;
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 25px;
+            padding: 40px 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            border: 3px solid #f0f0f0;
         }
 
         .header h1 {
             color: #5a67d8;
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(90, 103, 216, 0.1);
+        }
+
+        .header p {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #4a5568;
         }
 
         .welcome-screen {
             background: white;
-            border-radius: 20px;
-            padding: 40px;
+            border-radius: 25px;
+            padding: 50px 40px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            border: 3px solid #f0f0f0;
+            margin-bottom: 30px;
         }
 
         .game-screen {
@@ -195,43 +211,54 @@
         }
 
         .input-group {
-            margin: 20px 0;
+            margin: 30px 0;
+        }
+
+        .input-group h3 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            color: #4a5568;
         }
 
         .input-group input {
             width: 100%;
-            max-width: 400px;
-            padding: 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1.2em;
+            max-width: 450px;
+            padding: 18px 20px;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1.3em;
             text-align: center;
             font-family: inherit;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
+            background: #f8fafc;
         }
 
         .input-group input:focus {
             outline: none;
             border-color: #5a67d8;
-            box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.1);
+            box-shadow: 0 0 0 4px rgba(90, 103, 216, 0.1);
+            background: white;
+            transform: scale(1.02);
         }
 
         .btn {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            border-radius: 10px;
-            padding: 15px 30px;
-            font-size: 1.1em;
+            border-radius: 15px;
+            padding: 18px 35px;
+            font-size: 1.2em;
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: inherit;
-            margin: 10px;
+            margin: 15px 10px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
 
         .name-fact {
@@ -274,25 +301,41 @@
 
         .ranking-section {
             background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
+            border-radius: 20px;
+            padding: 30px 25px;
+            margin: 30px 0;
             color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ranking-section h3 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .top-players {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
 
         .player-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 18px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .player-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
 
         .player-rank {
@@ -317,8 +360,36 @@
 
         .loading {
             text-align: center;
-            padding: 20px;
+            padding: 25px;
             font-style: italic;
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        /* Responsive design para móviles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .header h1 {
+                font-size: 2.2em;
+            }
+            
+            .welcome-screen {
+                padding: 30px 20px;
+            }
+            
+            .input-group input {
+                max-width: 100%;
+                font-size: 1.1em;
+            }
+            
+            .btn {
+                padding: 15px 25px;
+                font-size: 1.1em;
+                margin: 10px 5px;
+            }
         }
     </style>
 </head>
@@ -335,17 +406,19 @@
 
         <!-- Pantalla de Bienvenida -->
         <div id="welcomeScreen" class="welcome-screen">
-            <div class="emoji">🌟</div>
-            <h2>¡Bienvenido a MateMaster!</h2>
-            <p>¡Hola! Soy tu asistente matemático. Vamos a aprender divisiones y promedios de manera divertida.</p>
+            <div class="emoji" style="font-size: 3em; margin-bottom: 20px;">🌟</div>
+            <h2 style="font-size: 2.2em; margin-bottom: 20px; color: #4a5568;">¡Bienvenido a MateMaster!</h2>
+            <p style="font-size: 1.2em; margin-bottom: 30px; color: #718096; line-height: 1.6;">¡Hola! Soy tu asistente matemático. Vamos a aprender divisiones y promedios de manera divertida con el poder de TWICE! 💖</p>
             
             <div class="input-group">
                 <h3>¿Cuál es tu nombre?</h3>
                 <input type="text" id="playerName" placeholder="Escribe tu nombre aquí..." aria-label="Nombre del jugador" required onkeypress="handleKeyPress(event)">
             </div>
             
-            <button class="btn" onclick="startGame()">¡Comenzar Aventura!</button>
-            <button class="btn" onclick="resetProgress()" style="background: linear-gradient(135deg, #f56565, #e53e3e);">🔄 Reiniciar Progreso</button>
+            <div style="margin-top: 30px;">
+                <button class="btn" onclick="startGame()">🎮 ¡Comenzar Aventura!</button>
+                <button class="btn" onclick="resetProgress()" style="background: linear-gradient(135deg, #f56565, #e53e3e); box-shadow: 0 5px 15px rgba(245, 101, 101, 0.3);">🔄 Reiniciar Progreso</button>
+            </div>
         </div>
         
         <!-- Ranking global al inicio -->
@@ -353,6 +426,14 @@
             <h3>🏆 Top 5 Jugadores</h3>
             <div id="topPlayers" class="top-players">
                 <div class="loading">Cargando ranking...</div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" onclick="showCompleteRanking()" style="
+                    background: linear-gradient(135deg, #48bb78, #38a169);
+                    box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+                    font-size: 1em;
+                    padding: 12px 25px;
+                ">📊 Ver Estadísticas Completas</button>
             </div>
         </div>
         </div>
@@ -1218,16 +1299,20 @@
                     const rank = index + 1;
                     const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏅';
                     const timeFormatted = formatTime(player.totalTime);
+                    const totalQuestions = player.totalCorrect + player.totalIncorrect;
+                    const accuracy = totalQuestions > 0 ? Math.round((player.totalCorrect / totalQuestions) * 100) : 0;
+                    const averageTime = player.completedLevels > 0 ? Math.round(player.totalTime / player.completedLevels) : 0;
                     
                     html += `
-                        <div class="player-card">
+                        <div class="player-card" onclick="showPlayerDetails('${player.name}')">
                             <div class="player-rank">${rankEmoji}</div>
                             <div class="player-info">
                                 <div class="player-name">${player.name}</div>
                                 <div class="player-stats">
-                                    ⏱️ ${timeFormatted} | ✅ ${player.totalCorrect} | ❌ ${player.totalIncorrect} | 🎯 ${player.completedLevels} niveles
+                                    ⏱️ ${formatTime(averageTime)} | 🎯 ${accuracy}% | ✅ ${player.totalCorrect} | ❌ ${player.totalIncorrect} | 🏆 ${player.completedLevels}/4
                                 </div>
                             </div>
+                            <div style="font-size: 0.8em; opacity: 0.7;">👁️ Ver detalles</div>
                         </div>
                     `;
                 });
@@ -1236,6 +1321,88 @@
             } catch (error) {
                 document.getElementById('topPlayers').innerHTML = '<div class="loading">Error cargando ranking</div>';
             }
+        }
+
+        // Función para mostrar detalles del jugador
+        function showPlayerDetails(playerName) {
+            const localStats = JSON.parse(localStorage.getItem('mateMasterStats')) || {};
+            const playerData = localStats[playerName];
+            
+            if (!playerData) {
+                showInfoMessage('No hay datos detallados para este jugador.');
+                return;
+            }
+            
+            let detailsHtml = `
+                <div style="background: white; border-radius: 15px; padding: 25px; margin: 20px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                    <h3 style="text-align: center; color: #4a5568; margin-bottom: 20px;">📊 Detalles de ${playerName}</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            `;
+            
+            for (let level = 1; level <= 4; level++) {
+                const levelData = playerData[`level${level}`];
+                if (levelData) {
+                    const accuracy = levelData.correct + levelData.incorrect > 0 
+                        ? Math.round((levelData.correct / (levelData.correct + levelData.incorrect)) * 100)
+                        : 0;
+                    
+                    detailsHtml += `
+                        <div style="
+                            background: ${levelData.completed ? '#f0fff4' : '#fed7d7'};
+                            border: 2px solid ${levelData.completed ? '#48bb78' : '#f56565'};
+                            border-radius: 10px;
+                            padding: 15px;
+                        ">
+                            <h4 style="color: ${levelData.completed ? '#38a169' : '#e53e3e'}; margin-bottom: 10px;">
+                                🎯 Nivel ${level} ${levelData.completed ? '✅' : '❌'}
+                            </h4>
+                            <div style="font-size: 0.9em; line-height: 1.4;">
+                                <p>⏱️ Tiempo: ${formatTime(levelData.time)}</p>
+                                <p>✅ Correctas: ${levelData.correct}</p>
+                                <p>❌ Incorrectas: ${levelData.incorrect}</p>
+                                <p>🏆 Puntuación: ${levelData.score}/5</p>
+                                <p>🎯 Precisión: ${accuracy}%</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            detailsHtml += `
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="this.parentElement.parentElement.remove()" style="
+                            background: linear-gradient(135deg, #667eea, #764ba2);
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-family: inherit;
+                        ">Cerrar</button>
+                    </div>
+                </div>
+            `;
+            
+            // Crear modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+            modal.innerHTML = detailsHtml;
+            modal.onclick = function(e) {
+                if (e.target === modal) modal.remove();
+            };
+            document.body.appendChild(modal);
         }
 
         // Función para formatear tiempo
@@ -1250,6 +1417,166 @@
                 const hours = Math.floor(seconds / 3600);
                 const minutes = Math.floor((seconds % 3600) / 60);
                 return `${hours}h ${minutes}m`;
+            }
+        }
+
+        // Función para mostrar ranking completo con estadísticas
+        async function showCompleteRanking() {
+            try {
+                const rankings = await getGlobalRanking();
+                
+                if (rankings.length === 0) {
+                    showInfoMessage('No hay jugadores aún. ¡Sé el primero!');
+                    return;
+                }
+                
+                // Calcular estadísticas adicionales
+                const detailedRankings = rankings.map(player => {
+                    const totalQuestions = player.totalCorrect + player.totalIncorrect;
+                    const accuracy = totalQuestions > 0 ? Math.round((player.totalCorrect / totalQuestions) * 100) : 0;
+                    const averageTime = player.completedLevels > 0 ? Math.round(player.totalTime / player.completedLevels) : 0;
+                    
+                    return {
+                        ...player,
+                        accuracy,
+                        averageTime
+                    };
+                });
+                
+                let rankingHtml = `
+                    <div style="
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.8);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 1000;
+                        overflow-y: auto;
+                        padding: 20px;
+                    ">
+                        <div style="
+                            background: white;
+                            border-radius: 20px;
+                            padding: 30px;
+                            max-width: 90%;
+                            max-height: 90%;
+                            overflow-y: auto;
+                            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                        ">
+                            <div style="text-align: center; margin-bottom: 25px;">
+                                <h2 style="color: #2d3748; font-size: 2em; margin-bottom: 10px;">📊 Estadísticas Completas del Ranking</h2>
+                                <p style="color: #718096; font-size: 1.1em;">Total de jugadores: ${rankings.length}</p>
+                            </div>
+                            
+                            <div style="
+                                background: #f7fafc;
+                                border-radius: 15px;
+                                padding: 20px;
+                                margin-bottom: 25px;
+                            ">
+                                <h3 style="color: #4a5568; margin-bottom: 15px; text-align: center;">📈 Resumen General</h3>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; text-align: center;">
+                                    <div style="padding: 15px; background: #f0fff4; border-radius: 10px; border: 2px solid #48bb78;">
+                                        <div style="font-size: 1.8em; font-weight: bold; color: #38a169;">${rankings.length}</div>
+                                        <div style="font-size: 0.9em; color: #4a5568;">Total Jugadores</div>
+                                    </div>
+                                    <div style="padding: 15px; background: #fef5e7; border-radius: 10px; border: 2px solid #f6ad55;">
+                                        <div style="font-size: 1.8em; font-weight: bold; color: #d69e2e;">${Math.round(rankings.reduce((sum, p) => sum + p.totalCorrect, 0) / rankings.length)}</div>
+                                        <div style="font-size: 0.9em; color: #4a5568;">Promedio Correctas</div>
+                                    </div>
+                                    <div style="padding: 15px; background: #fed7d7; border-radius: 10px; border: 2px solid #f56565;">
+                                        <div style="font-size: 1.8em; font-weight: bold; color: #e53e3e;">${Math.round(rankings.reduce((sum, p) => sum + p.totalIncorrect, 0) / rankings.length)}</div>
+                                        <div style="font-size: 0.9em; color: #4a5568;">Promedio Incorrectas</div>
+                                    </div>
+                                    <div style="padding: 15px; background: #e6fffa; border-radius: 10px; border: 2px solid #319795;">
+                                        <div style="font-size: 1.8em; font-weight: bold; color: #319795;">${formatTime(Math.round(rankings.reduce((sum, p) => sum + p.totalTime, 0) / rankings.length))}</div>
+                                        <div style="font-size: 0.9em; color: #4a5568;">Tiempo Promedio</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                    <thead>
+                                        <tr style="background: #4a5568; color: white;">
+                                            <th style="padding: 12px; text-align: left;">Rank</th>
+                                            <th style="padding: 12px; text-align: left;">Jugador</th>
+                                            <th style="padding: 12px; text-align: center;">⏱️ Tiempo Promedio</th>
+                                            <th style="padding: 12px; text-align: center;">🎯 Precisión</th>
+                                            <th style="padding: 12px; text-align: center;">✅ Correctas</th>
+                                            <th style="padding: 12px; text-align: center;">❌ Incorrectas</th>
+                                            <th style="padding: 12px; text-align: center;">🏆 Niveles</th>
+                                            <th style="padding: 12px; text-align: center;">📊 Detalles</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                `;
+                
+                detailedRankings.forEach((player, index) => {
+                    const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅';
+                    const accuracyColor = player.accuracy >= 90 ? '#48bb78' : player.accuracy >= 80 ? '#38a169' : player.accuracy >= 70 ? '#f6ad55' : player.accuracy >= 60 ? '#f56565' : '#e53e3e';
+                    
+                    rankingHtml += `
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#f7fafc' : 'white'};">
+                            <td style="padding: 12px; font-weight: bold;">${rankEmoji} ${index + 1}</td>
+                            <td style="padding: 12px; font-weight: bold;">${player.name}</td>
+                            <td style="padding: 12px; text-align: center;">${formatTime(player.averageTime)}</td>
+                            <td style="padding: 12px; text-align: center;">
+                                <span style="color: ${accuracyColor}; font-weight: bold;">${player.accuracy}%</span>
+                            </td>
+                            <td style="padding: 12px; text-align: center; color: #48bb78;">${player.totalCorrect}</td>
+                            <td style="padding: 12px; text-align: center; color: #f56565;">${player.totalIncorrect}</td>
+                            <td style="padding: 12px; text-align: center;">${player.completedLevels}/4</td>
+                            <td style="padding: 12px; text-align: center;">
+                                <button onclick="showPlayerDetails('${player.name}')" style="
+                                    padding: 5px 10px;
+                                    border-radius: 5px;
+                                    border: 1px solid #cbd5e0;
+                                    background: #fff;
+                                    cursor: pointer;
+                                    font-size: 0.9em;
+                                ">👁️ Ver</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                rankingHtml += `
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 25px;">
+                                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
+                                    background: linear-gradient(135deg, #667eea, #764ba2);
+                                    color: white;
+                                    border: none;
+                                    padding: 15px 30px;
+                                    border-radius: 10px;
+                                    cursor: pointer;
+                                    font-family: inherit;
+                                    font-size: 1.1em;
+                                    font-weight: bold;
+                                ">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Crear modal
+                const modal = document.createElement('div');
+                modal.innerHTML = rankingHtml;
+                modal.onclick = function(e) {
+                    if (e.target === modal) modal.remove();
+                };
+                document.body.appendChild(modal);
+                
+            } catch (error) {
+                showInfoMessage('Error cargando estadísticas completas.');
             }
         }
 
