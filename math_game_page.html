@@ -483,13 +483,13 @@
                 [Math.floor(Math.random() * 10) + 5, Math.floor(Math.random() * 10) + 5, Math.floor(Math.random() * 10) + 5];
             
             const sum = numbers.reduce((a, b) => a + b, 0);
-            const correctAnswer = Math.round(sum / numbers.length * 10) / 10;
+            const correctAnswer = Math.round(sum / numbers.length);
             
             const wrongAnswers = [
-                Math.round((correctAnswer + 1) * 10) / 10,
-                Math.round((correctAnswer - 1) * 10) / 10,
-                Math.round((correctAnswer + 0.5) * 10) / 10
-            ];
+                correctAnswer + 1,
+                correctAnswer - 1,
+                correctAnswer + 2
+            ].filter(x => x > 0);
 
             return {
                 question: `¿Cuál es el promedio de ${numbers.join(', ')}?`,
@@ -508,13 +508,13 @@
                 const divisor = isFinal ? Math.floor(Math.random() * 5) + 4 : Math.floor(Math.random() * 3) + 3;
                 const sum = numbers.reduce((a, b) => a + b, 0);
                 const average = sum / numbers.length;
-                const correctAnswer = Math.round(average / divisor * 10) / 10;
+                const correctAnswer = Math.round(average / divisor);
                 
                 const wrongAnswers = [
-                    Math.round((correctAnswer + 1) * 10) / 10,
-                    Math.round((correctAnswer - 1) * 10) / 10,
-                    Math.round((correctAnswer * 2) * 10) / 10
-                ];
+                    correctAnswer + 1,
+                    correctAnswer - 1,
+                    correctAnswer + 2
+                ].filter(x => x > 0);
 
                 return {
                     question: `Si tengo ${numbers.join(', ')} puntos y quiero dividir el promedio entre ${divisor}, ¿cuál es el resultado?`,
@@ -678,12 +678,22 @@
                 max-width: 400px;
                 font-size: 1.1em;
             `;
-            messageDiv.innerHTML = message;
+            messageDiv.innerHTML = `
+                ${message}
+                <br><br>
+                <button onclick="this.parentElement.remove()" style="
+                    background: white;
+                    color: #38a169;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    font-size: 1em;
+                    cursor: pointer;
+                    font-family: inherit;
+                    font-weight: bold;
+                ">Apretame cuando termines de leerlo</button>
+            `;
             document.body.appendChild(messageDiv);
-            
-            setTimeout(() => {
-                document.body.removeChild(messageDiv);
-            }, 4000);
         }
 
         // Función para mostrar mensajes informativos
@@ -704,12 +714,22 @@
                 max-width: 400px;
                 font-size: 1.1em;
             `;
-            messageDiv.innerHTML = message;
+            messageDiv.innerHTML = `
+                ${message}
+                <br><br>
+                <button onclick="this.parentElement.remove()" style="
+                    background: white;
+                    color: #667eea;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    font-size: 1em;
+                    cursor: pointer;
+                    font-family: inherit;
+                    font-weight: bold;
+                ">Apretame cuando termines de leerlo</button>
+            `;
             document.body.appendChild(messageDiv);
-            
-            setTimeout(() => {
-                document.body.removeChild(messageDiv);
-            }, 4000);
         }
 
         function backToLevels() {
