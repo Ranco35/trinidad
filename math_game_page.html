@@ -494,29 +494,34 @@
             
             if (isFinal) {
                 // Para preguntas finales, usar 4 números
-                const baseNumber = Math.floor(Math.random() * 12) + 8;
+                const baseNumber = Math.floor(Math.random() * 10) + 8;
+                const num1 = baseNumber;
+                const num2 = baseNumber + Math.floor(Math.random() * 4) - 2;
+                const num3 = baseNumber + Math.floor(Math.random() * 4) - 2;
+                const num4 = baseNumber + Math.floor(Math.random() * 4) - 2;
+                
                 // Asegurar que la suma sea divisible por 4
-                const targetSum = baseNumber * 4;
-                numbers = [
-                    baseNumber,
-                    baseNumber + Math.floor(Math.random() * 4) - 2,
-                    baseNumber + Math.floor(Math.random() * 4) - 2,
-                    targetSum - baseNumber - (baseNumber + Math.floor(Math.random() * 4) - 2) - (baseNumber + Math.floor(Math.random() * 4) - 2)
-                ];
+                const sum = num1 + num2 + num3 + num4;
+                const remainder = sum % 4;
+                const adjustedNum4 = num4 + (4 - remainder);
+                
+                numbers = [num1, num2, num3, adjustedNum4];
+                correctAnswer = (num1 + num2 + num3 + adjustedNum4) / 4;
             } else {
                 // Para preguntas normales, usar 3 números
                 const baseNumber = Math.floor(Math.random() * 8) + 6;
+                const num1 = baseNumber;
+                const num2 = baseNumber + Math.floor(Math.random() * 4) - 2;
+                const num3 = baseNumber + Math.floor(Math.random() * 4) - 2;
+                
                 // Asegurar que la suma sea divisible por 3
-                const targetSum = baseNumber * 3;
-                numbers = [
-                    baseNumber,
-                    baseNumber + Math.floor(Math.random() * 4) - 2,
-                    targetSum - baseNumber - (baseNumber + Math.floor(Math.random() * 4) - 2)
-                ];
+                const sum = num1 + num2 + num3;
+                const remainder = sum % 3;
+                const adjustedNum3 = num3 + (3 - remainder);
+                
+                numbers = [num1, num2, adjustedNum3];
+                correctAnswer = (num1 + num2 + adjustedNum3) / 3;
             }
-            
-            const sum = numbers.reduce((a, b) => a + b, 0);
-            correctAnswer = sum / numbers.length; // Ahora será siempre entero
             
             // Asegurar que las respuestas incorrectas sean diferentes
             const wrongAnswers = [];
