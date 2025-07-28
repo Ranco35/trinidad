@@ -1651,63 +1651,89 @@
                     : window.location.origin;
                 
                 showInfoMessage('🔧 Probando conexión con servidor...');
+                console.log(`🔍 Probando conexión con: ${serverUrl}`);
                 
-                // Probar healthcheck
+                // Probar healthcheck primero
+                console.log('📡 Probando endpoint /health...');
                 const healthResponse = await fetch(`${serverUrl}/health`);
+                console.log(`📡 Health response status: ${healthResponse.status}`);
+                console.log(`📡 Health response headers:`, healthResponse.headers);
+                
                 if (!healthResponse.ok) {
-                    throw new Error(`Health check failed: ${healthResponse.status}`);
+                    const errorText = await healthResponse.text();
+                    console.log(`❌ Health response body:`, errorText);
+                    throw new Error(`Health check failed: ${healthResponse.status}\nResponse: ${errorText.substring(0, 200)}...`);
                 }
+                
+                const contentType = healthResponse.headers.get('content-type');
+                console.log(`📡 Content-Type: ${contentType}`);
+                
+                if (!contentType || !contentType.includes('application/json')) {
+                    const responseText = await healthResponse.text();
+                    console.log(`❌ Expected JSON but got:`, responseText.substring(0, 300));
+                    throw new Error(`Servidor devolvió HTML en lugar de JSON.\n\n¿Está el servidor Node.js corriendo en ${serverUrl}?\n\nRespuesta recibida: ${responseText.substring(0, 200)}...`);
+                }
+                
                 const healthData = await healthResponse.json();
+                console.log('✅ Health check exitoso:', healthData);
                 
-                // Probar envío de datos de prueba
-                const testData = {
-                    playerName: 'TEST_USER',
-                    level: 1,
-                    stats: {
-                        time: 30,
-                        correct: 3,
-                        incorrect: 2,
-                        score: 3,
-                        completed: true
-                    }
-                };
-                
-                const saveResponse = await fetch(`${serverUrl}/api/rankings`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(testData)
-                });
-                
-                if (!saveResponse.ok) {
-                    throw new Error(`Save test failed: ${saveResponse.status}`);
-                }
-                const saveData = await saveResponse.json();
-                
-                // Probar obtención de datos
-                const getRankingsResponse = await fetch(`${serverUrl}/api/rankings`);
-                if (!getRankingsResponse.ok) {
-                    throw new Error(`Get rankings failed: ${getRankingsResponse.status}`);
-                }
-                const rankingsData = await getRankingsResponse.json();
-                
+                // Si llegamos aquí, el servidor está respondiendo correctamente
                 showSuccessMessage(`✅ Servidor funcionando correctamente!
                 
                 🔗 URL: ${serverUrl}
-                💚 Health: ${healthData.status}
-                📊 Jugadores: ${saveData.totalPlayers}
-                📈 Rankings: ${rankingsData.length} jugadores con niveles completados
+                💚 Health: ${healthData.status || 'OK'}
+                📡 Content-Type: ${contentType}
                 
-                ¡El ranking se está guardando en la base de datos del servidor!`);
+                ¡El servidor está corriendo y respondiendo JSON correctamente!
+                
+                💡 Para probar la funcionalidad completa, completa un nivel del juego.`);
                 
             } catch (error) {
-                console.error('❌ Error probando servidor:', error);
+                console.error('❌ Error completo:', error);
+                
+                let diagnosticInfo = '';
+                
+                if (error.message.includes('Failed to fetch')) {
+                    diagnosticInfo = `
+🔍 DIAGNÓSTICO:
+• El servidor no está corriendo en ${window.location.hostname === 'localhost' ? 'http://localhost:3000' : window.location.origin}
+• ¿Está ejecutando 'node server.js' en la terminal?
+• ¿El puerto 3000 está libre?
+
+💡 SOLUCIONES:
+1. Abrir terminal en la carpeta del proyecto
+2. Ejecutar: node server.js
+3. Verificar que aparezca: "Servidor corriendo en puerto 3000"
+                    `;
+                } else if (error.message.includes('HTML en lugar de JSON')) {
+                    diagnosticInfo = `
+🔍 DIAGNÓSTICO:
+• El servidor está corriendo pero no tiene los endpoints correctos
+• Probablemente es un servidor web estático (no Node.js)
+
+💡 SOLUCIONES:
+1. Asegúrate de tener server.js configurado
+2. Ejecutar: node server.js (no un servidor web estático)
+3. Verificar que tenga las rutas /health y /api/rankings
+                    `;
+                } else {
+                    diagnosticInfo = `
+🔍 DETALLES DEL ERROR:
+${error.message}
+
+💡 RECOMENDACIONES:
+1. Verificar que el servidor Node.js esté corriendo
+2. Revisar la consola del navegador (F12) para más detalles
+3. Verificar que el puerto 3000 esté disponible
+                    `;
+                }
+                
                 showInfoMessage(`❌ Error de conexión con servidor:
                 
-                ${error.message}
+                ${diagnosticInfo}
                 
-                El ranking solo se está guardando localmente en tu navegador. Verifica que el servidor esté funcionando correctamente.`);
+                📊 ESTADO ACTUAL:
+                Los datos se están guardando solo localmente en tu navegador.`);
             }
         }
 
