@@ -1272,9 +1272,8 @@
         // Función para guardar en servidor global
         async function saveToGlobalServer(playerName, level, stats) {
             try {
-                const serverUrl = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3000' 
-                    : window.location.origin;
+                const isLocal = window.location.hostname === 'localhost';
+                const serverUrl = isLocal ? 'http://localhost:3000' : window.location.origin;
                 
                 console.log(`Intentando guardar en servidor: ${serverUrl}/api/rankings`);
                 console.log('Datos a enviar:', { playerName, level, stats });
@@ -1308,9 +1307,8 @@
         // Función para obtener ranking global
         async function getGlobalRanking() {
             try {
-                const serverUrl = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3000' 
-                    : window.location.origin;
+                const isLocal = window.location.hostname === 'localhost';
+                const serverUrl = isLocal ? 'http://localhost:3000' : window.location.origin;
                 
                 console.log(`Obteniendo ranking desde: ${serverUrl}/api/rankings`);
                 
@@ -1646,12 +1644,12 @@
         // Función para probar conexión con servidor
         async function testServerConnection() {
             try {
-                const serverUrl = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3000' 
-                    : window.location.origin;
+                const isLocal = window.location.hostname === 'localhost';
+                const serverUrl = isLocal ? 'http://localhost:3000' : window.location.origin;
+                const environment = isLocal ? 'LOCAL' : 'PRODUCCIÓN';
                 
-                showInfoMessage('🔧 Probando conexión con servidor...');
-                console.log(`🔍 Probando conexión con: ${serverUrl}`);
+                showInfoMessage(`🔧 Probando conexión con servidor ${environment}...`);
+                console.log(`🔍 Probando conexión ${environment} con: ${serverUrl}`);
                 
                 // Probar healthcheck primero
                 console.log('📡 Probando endpoint /health...');
@@ -1678,11 +1676,14 @@
                 console.log('✅ Health check exitoso:', healthData);
                 
                 // Si llegamos aquí, el servidor está respondiendo correctamente
-                showSuccessMessage(`✅ Servidor funcionando correctamente!
+                showSuccessMessage(`✅ Servidor ${environment} funcionando correctamente!
                 
                 🔗 URL: ${serverUrl}
+                🌍 Entorno: ${environment}
                 💚 Health: ${healthData.status || 'OK'}
                 📡 Content-Type: ${contentType}
+                🏆 Niveles: ${healthData.levels || 5}
+                📊 Versión: ${healthData.version || '1.0'}
                 
                 ¡El servidor está corriendo y respondiendo JSON correctamente!
                 
@@ -1694,28 +1695,56 @@
                 let diagnosticInfo = '';
                 
                 if (error.message.includes('Failed to fetch')) {
-                    diagnosticInfo = `
-🔍 DIAGNÓSTICO:
-• El servidor no está corriendo en ${window.location.hostname === 'localhost' ? 'http://localhost:3000' : window.location.origin}
+                    if (isLocal) {
+                        diagnosticInfo = `
+🔍 DIAGNÓSTICO LOCAL:
+• El servidor no está corriendo en http://localhost:3000
 • ¿Está ejecutando 'node server.js' en la terminal?
 • ¿El puerto 3000 está libre?
 
 💡 SOLUCIONES:
 1. Abrir terminal en la carpeta del proyecto
-2. Ejecutar: node server.js
+2. Ejecutar: npm run dev
 3. Verificar que aparezca: "Servidor corriendo en puerto 3000"
-                    `;
-                } else if (error.message.includes('HTML en lugar de JSON')) {
-                    diagnosticInfo = `
-🔍 DIAGNÓSTICO:
-• El servidor está corriendo pero no tiene los endpoints correctos
-• Probablemente es un servidor web estático (no Node.js)
+                        `;
+                    } else {
+                        diagnosticInfo = `
+🔍 DIAGNÓSTICO PRODUCCIÓN:
+• El servidor en producción no está respondiendo
+• URL probada: ${serverUrl}
+• Posible problema de despliegue
 
 💡 SOLUCIONES:
-1. Asegúrate de tener server.js configurado
-2. Ejecutar: node server.js (no un servidor web estático)
-3. Verificar que tenga las rutas /health y /api/rankings
-                    `;
+1. Verificar que el despliegue haya sido exitoso
+2. Revisar los logs del servidor en tu plataforma (Railway/Vercel)
+3. Asegurarse de que package.json tenga "start": "node server.js"
+                        `;
+                    }
+                } else if (error.message.includes('HTML en lugar de JSON')) {
+                    if (isLocal) {
+                        diagnosticInfo = `
+🔍 DIAGNÓSTICO LOCAL:
+• El servidor local no tiene los endpoints correctos
+• Probablemente hay otro servidor corriendo en puerto 3000
+
+💡 SOLUCIONES:
+1. Detener otros servidores: taskkill /f /im node.exe
+2. Ejecutar: npm run dev
+3. Verificar que use server.js (no servidor estático)
+                        `;
+                    } else {
+                        diagnosticInfo = `
+🔍 DIAGNÓSTICO PRODUCCIÓN:
+• El servidor en producción es estático (no Node.js)
+• Los archivos de configuración necesitan actualizarse
+
+💡 SOLUCIONES:
+1. ✅ Archivos ya actualizados para usar Node.js
+2. Hacer redeploy en tu plataforma de hosting
+3. Verificar que vercel.json use "@vercel/node"
+4. Verificar que railway.json use "npm start"
+                        `;
+                    }
                 } else {
                     diagnosticInfo = `
 🔍 DETALLES DEL ERROR:

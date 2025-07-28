@@ -186,10 +186,22 @@ app.use((error, req, res, next) => {
 
 // Iniciar servidor
 const server = app.listen(PORT, '0.0.0.0', () => {
+    const environment = process.env.NODE_ENV || 'development';
+    const isProduction = environment === 'production';
+    
     console.log(`🎯 MateMaster server running on port ${PORT}`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🌐 Access at: http://localhost:${PORT}`);
+    console.log(`📊 Environment: ${environment}`);
+    
+    if (isProduction) {
+        console.log(`🌐 Production server running`);
+        console.log(`📡 Health check: /health`);
+        console.log(`📊 API endpoints: /api/rankings`);
+    } else {
+        console.log(`🌐 Access at: http://localhost:${PORT}`);
+    }
+    
     console.log(`📁 Serving files from: ${__dirname}`);
+    console.log(`✅ Server ready - endpoints configured: /health, /api/rankings`);
 });
 
 // Manejo de cierre graceful

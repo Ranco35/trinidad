@@ -2,14 +2,25 @@
   "version": 2,
   "builds": [
     {
-      "src": "math_game_page.html",
-      "use": "@vercel/static"
+      "src": "server.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
+      "src": "/health",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/api/rankings",
+      "dest": "/server.js"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/math_game_page.html"
+      "dest": "/server.js"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 } 
