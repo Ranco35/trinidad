@@ -23,6 +23,9 @@ app.get('/', (req, res) => {
 // API para rankings
 app.get('/api/rankings', (req, res) => {
     try {
+        console.log('📊 Recibida petición GET /api/rankings');
+        console.log(`📈 Datos en memoria: ${rankings.length} jugadores`);
+        
         // Procesar rankings para calcular estadísticas
         const processedRankings = rankings.map(player => {
             let totalTime = 0;
@@ -60,19 +63,25 @@ app.get('/api/rankings', (req, res) => {
                 return avgTimeA - avgTimeB;
             });
         
+        console.log(`✅ Enviando ${sortedRankings.length} jugadores en ranking`);
         res.json(sortedRankings);
     } catch (error) {
-        console.error('Error getting rankings:', error);
+        console.error('❌ Error getting rankings:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
 
 app.post('/api/rankings', (req, res) => {
     try {
+        console.log('📝 Recibida petición POST /api/rankings');
+        console.log('Headers:', req.headers);
+        console.log('Body:', req.body);
+        
         const { playerName, level, stats } = req.body;
         
         if (!playerName || !level || !stats) {
-            return res.status(400).json({ error: 'Datos incompletos' });
+            console.error('❌ Datos incompletos:', { playerName, level, stats });
+            return res.status(400).json({ error: 'Datos incompletos', received: { playerName, level, stats } });
         }
         
         // Buscar si el jugador ya existe
@@ -80,22 +89,36 @@ app.post('/api/rankings', (req, res) => {
         
         if (playerIndex === -1) {
             // Nuevo jugador
-            rankings.push({
+            const newPlayer = {
                 playerName,
                 stats: {
                     [`level${level}`]: stats
                 }
-            });
+            };
+            rankings.push(newPlayer);
+            console.log(`➕ Nuevo jugador agregado: ${playerName}`);
         } else {
             // Actualizar jugador existente
             rankings[playerIndex].stats[`level${level}`] = stats;
+            console.log(`🔄 Jugador actualizado: ${playerName}`);
         }
         
-        console.log(`Estadísticas guardadas para ${playerName}, nivel ${level}`);
-        res.json({ success: true, message: 'Estadísticas guardadas correctamente' });
+        console.log(`✅ Estadísticas guardadas para ${playerName}, nivel ${level}`);
+        console.log(`📊 Total jugadores en ranking: ${rankings.length}`);
+        
+        res.json({ 
+            success: true, 
+            message: 'Estadísticas guardadas correctamente',
+            playerName,
+            level,
+            totalPlayers: rankings.length
+        });
     } catch (error) {
-        console.error('Error saving rankings:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        console.error('❌ Error saving rankings:', error);
+        res.status(500).json({ 
+            error: 'Error interno del servidor',
+            details: error.message
+        });
     }
 });
 

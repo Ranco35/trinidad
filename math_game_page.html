@@ -434,8 +434,13 @@
                     font-size: 1em;
                     padding: 12px 25px;
                 ">📊 Ver Estadísticas Completas</button>
+                <button class="btn" onclick="testServerConnection()" style="
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+                    font-size: 0.9em;
+                    padding: 10px 20px;
+                ">🔧 Probar Servidor</button>
             </div>
-        </div>
         </div>
 
         <!-- Pantalla Principal del Juego -->
@@ -445,7 +450,7 @@
             <div style="text-align: center; color: white; margin: 20px 0;">
                 <h2>Selecciona tu nivel</h2>
                 <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin: 20px 0;">
-                    <p style="margin: 0; font-size: 1.1em;">📊 Progreso General: <span id="totalProgress">0</span>/20 puntos</p>
+                    <p style="margin: 0; font-size: 1.1em;">📊 Progreso General: <span id="totalProgress">0</span>/25 puntos</p>
                 </div>
                 <div style="background: rgba(255,255,255,0.15); border-radius: 10px; padding: 12px; margin: 15px 0; border: 2px solid rgba(255,255,255,0.3);">
                     <p style="margin: 0; font-size: 0.95em; color: #e2e8f0;">
@@ -458,31 +463,38 @@
             
             <div class="level-selector">
                 <div class="level-card" id="level1" onclick="selectLevel(1)">
-                    <div class="emoji">🟢</div>
-                    <h3>Nivel 1: Fácil</h3>
-                    <p>Divisiones simples</p>
+                    <div class="emoji">🧮</div>
+                    <h3>Nivel 1: Operaciones Combinadas</h3>
+                    <p>Paréntesis, multiplicación, división</p>
                     <p>🏆 <span id="score1">0</span>/5</p>
                 </div>
                 
                 <div class="level-card locked" id="level2" onclick="selectLevel(2)">
-                    <div class="emoji">🟡</div>
-                    <h3>Nivel 2: Medio</h3>
-                    <p>Divisiones con resto</p>
+                    <div class="emoji">🟢</div>
+                    <h3>Nivel 2: Divisiones Simples</h3>
+                    <p>Divisiones exactas básicas</p>
                     <p>🏆 <span id="score2">0</span>/5</p>
                 </div>
                 
                 <div class="level-card locked" id="level3" onclick="selectLevel(3)">
-                    <div class="emoji">🟠</div>
-                    <h3>Nivel 3: Difícil</h3>
-                    <p>Promedios básicos</p>
+                    <div class="emoji">🟡</div>
+                    <h3>Nivel 3: Divisiones con Resto</h3>
+                    <p>Divisiones no exactas</p>
                     <p>🏆 <span id="score3">0</span>/5</p>
                 </div>
                 
                 <div class="level-card locked" id="level4" onclick="selectLevel(4)">
-                    <div class="emoji">🔴</div>
-                    <h3>Nivel 4: Experto</h3>
-                    <p>Problemas complejos</p>
+                    <div class="emoji">🟠</div>
+                    <h3>Nivel 4: Promedios</h3>
+                    <p>Cálculo de promedios</p>
                     <p>🏆 <span id="score4">0</span>/5</p>
+                </div>
+                
+                <div class="level-card locked" id="level5" onclick="selectLevel(5)">
+                    <div class="emoji">🔴</div>
+                    <h3>Nivel 5: TWICE Master</h3>
+                    <p>Problemas expertos complejos</p>
+                    <p>🏆 <span id="score5">0</span>/5</p>
                 </div>
             </div>
         </div>
@@ -510,11 +522,11 @@
         let score = 0;
         let questions = [];
         let playerName = '';
-        let levelScores = JSON.parse(localStorage.getItem('mateMasterScores')) || [0, 0, 0, 0]; // Puntuaciones por nivel
-        let unlockedLevels = parseInt(localStorage.getItem('mateMasterUnlockedLevels')) || 1; // Niveles desbloqueados
-        let startTime = 0; // Tiempo de inicio del nivel
-        let levelStats = JSON.parse(localStorage.getItem('mateMasterStats')) || {}; // Estadísticas por jugador
-        let currentStats = { correct: 0, incorrect: 0, time: 0 }; // Estadísticas del nivel actual
+        let levelScores = JSON.parse(localStorage.getItem('mateMasterScores')) || [0, 0, 0, 0, 0];
+        let unlockedLevels = parseInt(localStorage.getItem('mateMasterUnlockedLevels')) || 1;
+        let startTime = 0;
+        let levelStats = JSON.parse(localStorage.getItem('mateMasterStats')) || {};
+        let currentStats = { correct: 0, incorrect: 0, time: 0 };
 
         const nameCharacteristics = {
             'a': 'ambicioso/a y aventurero/a',
@@ -559,7 +571,7 @@
             }
 
             // Verificar si es la creadora
-            const isCreator = ['trinidad', 'triniodad', 'trini', 'trini'].includes(playerName.toLowerCase());
+            const isCreator = ['trinidad', 'triniodad', 'trini'].includes(playerName.toLowerCase());
             
             if (isCreator) {
                 document.getElementById('playerInfo').innerHTML = 
@@ -567,25 +579,28 @@
                      <strong>OOO GRAN TRINIDAD LA MASTER DE LAS MATEMÁTICAS</strong><br>
                      ¡BIENVENIDA A TU REINO DE LOS NÚMEROS! 🎯✨`;
             } else {
-            const characteristic = getNameCharacteristic(playerName);
-            document.getElementById('playerInfo').innerHTML = 
-                `🎭 ¡Hola ${playerName}! Tu nombre significa que eres <strong>${characteristic}</strong>. ¡Perfecto para ser un MateMaster!`;
+                const characteristic = getNameCharacteristic(playerName);
+                document.getElementById('playerInfo').innerHTML = 
+                    `🎭 ¡Hola ${playerName}! Tu nombre significa que eres <strong>${characteristic}</strong>. ¡Perfecto para ser un MateMaster!`;
             }
 
+            // OCULTAR pantalla de bienvenida y ranking
             document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('globalRanking').style.display = 'none';
+            
+            // MOSTRAR pantalla del juego
             document.getElementById('gameScreen').style.display = 'block';
             updateLevelCards();
         }
 
         function updateLevelCards() {
-            for (let i = 1; i <= 4; i++) {
+            for (let i = 1; i <= 5; i++) {
                 const card = document.getElementById(`level${i}`);
                 const scoreSpan = document.getElementById(`score${i}`);
                 
                 if (i <= unlockedLevels) {
                     card.classList.remove('locked');
                     
-                    // Verificar si el nivel fue realmente completado (no solo puntuación)
                     const levelData = levelStats[playerName] && levelStats[playerName][`level${i}`];
                     const isCompleted = levelData && levelData.completed === true;
                     
@@ -602,7 +617,6 @@
                 scoreSpan.textContent = levelScores[i-1];
             }
             
-            // Actualizar progreso total
             const totalProgress = levelScores.reduce((sum, score) => sum + score, 0);
             const totalProgressElement = document.getElementById('totalProgress');
             if (totalProgressElement) {
@@ -616,16 +630,19 @@
                 return;
             }
 
-            // Mensaje especial para el nivel 2
-            if (level === 2) {
+            if (level === 1) {
+                showInfoMessage('🧮 ¡Prepárate para las operaciones combinadas! Recuerda: primero paréntesis, luego multiplicación/división, después suma/resta. ¡Saca papel y lápiz! 📝');
+            }
+            
+            if (level === 3) {
                 showInfoMessage('📝 ¡Saca una hoja y un lápiz! Esto se va a poner difícil... como quedarse callados mientras el míster se va al baño 😅');
             }
 
             currentLevel = level;
             currentQuestion = 0;
             score = 0;
-            startTime = Date.now(); // Iniciar cronómetro
-            currentStats = { correct: 0, incorrect: 0, time: 0 }; // Resetear estadísticas
+            startTime = Date.now();
+            currentStats = { correct: 0, incorrect: 0, time: 0 };
             generateQuestions(level);
             
             document.getElementById('gameScreen').style.display = 'none';
@@ -641,21 +658,163 @@
                 const isFinalQuestion = i === 4;
                 
                 switch(level) {
-                    case 1: // Fácil - Divisiones exactas simples
+                    case 1:
+                        question = generateCombinedOperationsQuestion(isFinalQuestion);
+                        break;
+                    case 2:
                         question = generateEasyDivision(isFinalQuestion);
                         break;
-                    case 2: // Medio - Divisiones con resto
+                    case 3:
                         question = generateMediumDivision(isFinalQuestion);
                         break;
-                    case 3: // Difícil - Promedios básicos
+                    case 4:
                         question = generateAverageQuestion(isFinalQuestion);
                         break;
-                    case 4: // Experto - Problemas complejos
+                    case 5:
                         question = generateExpertQuestion(isFinalQuestion);
                         break;
                 }
                 questions.push(question);
             }
+        }
+
+        function generateCombinedOperationsQuestion(isFinal) {
+            const operationTypes = [
+                'addition_subtraction',
+                'multiplication_addition',
+                'division_subtraction', 
+                'parentheses_simple',
+                'parentheses_complex'
+            ];
+            
+            const type = operationTypes[Math.floor(Math.random() * operationTypes.length)];
+            
+            switch (type) {
+                case 'addition_subtraction':
+                    return generateAdditionSubtraction(isFinal);
+                case 'multiplication_addition':
+                    return generateMultiplicationAddition(isFinal);
+                case 'division_subtraction':
+                    return generateDivisionSubtraction(isFinal);
+                case 'parentheses_simple':
+                    return generateParenthesesSimple(isFinal);
+                case 'parentheses_complex':
+                    return generateParenthesesComplex(isFinal);
+                default:
+                    return generateAdditionSubtraction(isFinal);
+            }
+        }
+
+        function generateAdditionSubtraction(isFinal) {
+            const a = isFinal ? Math.floor(Math.random() * 1000) + 1000 : Math.floor(Math.random() * 500) + 500;
+            const b = Math.floor(Math.random() * (a / 2)) + 100;
+            const c = Math.floor(Math.random() * 1000) + 500;
+            
+            const correctAnswer = a - b + c;
+            const wrongAnswers = [
+                a + b + c,
+                a - b - c,
+                a + b - c,
+                correctAnswer + Math.floor(Math.random() * 200) + 50
+            ].filter(x => x > 0 && x !== correctAnswer);
+
+            return {
+                question: `${a} - ${b} + ${c} =`,
+                options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+                correct: correctAnswer,
+                isFinal: isFinal
+            };
+        }
+
+        function generateMultiplicationAddition(isFinal) {
+            const a = isFinal ? Math.floor(Math.random() * 150) + 50 : Math.floor(Math.random() * 100) + 20;
+            const b = Math.floor(Math.random() * 20) + 5;
+            const c = Math.floor(Math.random() * 15) + 2;
+            
+            const correctAnswer = a + (b * c);
+            const wrongAnswers = [
+                (a + b) * c,
+                a * b + c,
+                a + b + c,
+                correctAnswer + Math.floor(Math.random() * 50) + 10
+            ].filter(x => x > 0 && x !== correctAnswer);
+
+            return {
+                question: `${a} + ${b} × ${c} =`,
+                options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+                correct: correctAnswer,
+                isFinal: isFinal
+            };
+        }
+
+        function generateDivisionSubtraction(isFinal) {
+            const divisor1 = Math.floor(Math.random() * 8) + 2;
+            const quotient1 = isFinal ? Math.floor(Math.random() * 150) + 50 : Math.floor(Math.random() * 100) + 20;
+            const a = divisor1 * quotient1;
+            
+            const divisor2 = Math.floor(Math.random() * 8) + 2;
+            const quotient2 = Math.floor(Math.random() * 50) + 10;
+            const c = divisor2 * quotient2;
+            
+            const correctAnswer = quotient1 - quotient2;
+            const wrongAnswers = [
+                quotient1 + quotient2,
+                a - c,
+                Math.floor((a - c) / (divisor1 + divisor2)),
+                correctAnswer + Math.floor(Math.random() * 20) + 5
+            ].filter(x => x > 0 && x !== correctAnswer);
+
+            return {
+                question: `${a} ÷ ${divisor1} - ${c} ÷ ${divisor2} =`,
+                options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+                correct: correctAnswer,
+                isFinal: isFinal
+            };
+        }
+
+        function generateParenthesesSimple(isFinal) {
+            const a = Math.floor(Math.random() * 50) + 10;
+            const b = Math.floor(Math.random() * 50) + 10;
+            const c = isFinal ? Math.floor(Math.random() * 15) + 5 : Math.floor(Math.random() * 10) + 2;
+            
+            const correctAnswer = (a + b) * c;
+            const wrongAnswers = [
+                a + b * c,
+                a * c + b,
+                a + b + c,
+                correctAnswer + Math.floor(Math.random() * 100) + 20
+            ].filter(x => x > 0 && x !== correctAnswer);
+
+            return {
+                question: `(${a} + ${b}) × ${c} =`,
+                options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+                correct: correctAnswer,
+                isFinal: isFinal
+            };
+        }
+
+        function generateParenthesesComplex(isFinal) {
+            const a = isFinal ? Math.floor(Math.random() * 1500) + 500 : Math.floor(Math.random() * 800) + 200;
+            const b = Math.floor(Math.random() * 50) + 20;
+            const c = Math.floor(Math.random() * 15) + 5;
+            const d = Math.floor(Math.random() * 10) + 2;
+            
+            const parenthesesResult = b + (c * d);
+            const correctAnswer = a - parenthesesResult;
+            
+            const wrongAnswers = [
+                a - b + c * d,
+                a - b - c * d,
+                (a - b) + c * d,
+                correctAnswer + Math.floor(Math.random() * 100) + 30
+            ].filter(x => x > 0 && x !== correctAnswer);
+
+            return {
+                question: `${a} - (${b} + ${c} × ${d}) =`,
+                options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+                correct: correctAnswer,
+                isFinal: isFinal
+            };
         }
 
         function generateEasyDivision(isFinal) {
@@ -701,66 +860,26 @@
         }
 
         function generateAverageQuestion(isFinal) {
-            // Generar números que den un promedio entero exacto
-            let numbers;
-            let correctAnswer;
+            const numbers = [];
+            const count = isFinal ? Math.floor(Math.random() * 2) + 5 : Math.floor(Math.random() * 2) + 4;
+            let sum = 0;
             
-            if (isFinal) {
-                // Para preguntas finales, usar 4 números
-                const baseNumber = Math.floor(Math.random() * 10) + 8;
-                const num1 = baseNumber;
-                const num2 = baseNumber + Math.floor(Math.random() * 4) - 2;
-                const num3 = baseNumber + Math.floor(Math.random() * 4) - 2;
-                const num4 = baseNumber + Math.floor(Math.random() * 4) - 2;
-                
-                // Asegurar que la suma sea divisible por 4
-                const sum = num1 + num2 + num3 + num4;
-                const remainder = sum % 4;
-                const adjustedNum4 = num4 + (4 - remainder);
-                
-                numbers = [num1, num2, num3, adjustedNum4];
-                correctAnswer = (num1 + num2 + num3 + adjustedNum4) / 4;
-            } else {
-                // Para preguntas normales, usar 3 números
-                const baseNumber = Math.floor(Math.random() * 8) + 6;
-                const num1 = baseNumber;
-                const num2 = baseNumber + Math.floor(Math.random() * 4) - 2;
-                const num3 = baseNumber + Math.floor(Math.random() * 4) - 2;
-                
-                // Asegurar que la suma sea divisible por 3
-                const sum = num1 + num2 + num3;
-                const remainder = sum % 3;
-                const adjustedNum3 = num3 + (3 - remainder);
-                
-                numbers = [num1, num2, adjustedNum3];
-                correctAnswer = (num1 + num2 + adjustedNum3) / 3;
+            for (let i = 0; i < count; i++) {
+                const num = Math.floor(Math.random() * 60) + 15;
+                numbers.push(num);
+                sum += num;
             }
             
-            // Asegurar que las respuestas incorrectas sean diferentes
-            const wrongAnswers = [];
-            const possibleWrong = [
-                correctAnswer + 1,
-                correctAnswer - 1,
-                correctAnswer + 2,
-                correctAnswer - 2,
-                correctAnswer + 3
+            const correctAnswer = Math.round(sum / count);
+            const wrongAnswers = [
+                sum,
+                correctAnswer + Math.floor(Math.random() * 10) + 1,
+                correctAnswer - Math.floor(Math.random() * 5) + 1,
+                Math.round(correctAnswer * 1.2)
             ].filter(x => x > 0 && x !== correctAnswer);
-            
-            // Tomar hasta 3 respuestas incorrectas únicas
-            for (let i = 0; i < Math.min(3, possibleWrong.length); i++) {
-                wrongAnswers.push(possibleWrong[i]);
-            }
-            
-            // Si no hay suficientes respuestas incorrectas, agregar más
-            while (wrongAnswers.length < 3) {
-                const extraWrong = correctAnswer + Math.floor(Math.random() * 5) + 1;
-                if (!wrongAnswers.includes(extraWrong) && extraWrong > 0) {
-                    wrongAnswers.push(extraWrong);
-                }
-            }
 
             return {
-                question: `¿Cuál es el promedio de ${numbers.join(', ')}?`,
+                question: `Calcula el promedio de: ${numbers.join(' - ')}`,
                 options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
                 correct: correctAnswer,
                 isFinal: isFinal
@@ -768,141 +887,8 @@
         }
 
         function generateExpertQuestion(isFinal) {
-            const questionTypes = ['simple', 'medium', 'advanced'];
-            const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
-            
-            switch (type) {
-                case 'simple':
-                    return generateSimpleAverageQuestion(isFinal);
-                case 'medium':
-                    return generateMediumAverageQuestion(isFinal);
-                case 'advanced':
-                    return generateAdvancedAverageQuestion(isFinal);
-                default:
-                    return generateSimpleAverageQuestion(isFinal);
-            }
-        }
-
-        // Preguntas simples: 2-3 números, resultados < 50
-        function generateSimpleAverageQuestion(isFinal) {
-            const numCount = Math.floor(Math.random() * 2) + 2; // 2-3 números
-            const numbers = [];
-            let sum = 0;
-            
-            for (let i = 0; i < numCount; i++) {
-                const num = Math.floor(Math.random() * 20) + 5; // 5-25
-                numbers.push(num);
-                sum += num;
-            }
-            
-            const correctAnswer = Math.round(sum / numCount);
-            
-            // Asegurar que el resultado sea entero y razonable
-            if (correctAnswer > 30 || correctAnswer < 5) {
-                return generateSimpleAverageQuestion(isFinal);
-            }
-            
-            const wrongAnswers = generateWrongAnswers(correctAnswer, 3);
-            
-            return {
-                question: `¿Cuál es el promedio de ${numbers.join(', ')}?`,
-                options: shuffleArray([correctAnswer, ...wrongAnswers]),
-                correct: correctAnswer,
-                isFinal: isFinal,
-                theme: 'twice'
-            };
-        }
-
-        // Preguntas medias: 3-4 números, resultados < 100
-        function generateMediumAverageQuestion(isFinal) {
-            const numCount = Math.floor(Math.random() * 2) + 3; // 3-4 números
-            const numbers = [];
-            let sum = 0;
-            
-            for (let i = 0; i < numCount; i++) {
-                const num = Math.floor(Math.random() * 40) + 10; // 10-50
-                numbers.push(num);
-                sum += num;
-            }
-            
-            const correctAnswer = Math.round(sum / numCount);
-            
-            // Asegurar que el resultado sea entero y razonable
-            if (correctAnswer > 80 || correctAnswer < 15) {
-                return generateMediumAverageQuestion(isFinal);
-            }
-            
-            const wrongAnswers = generateWrongAnswers(correctAnswer, 3);
-            
-            return {
-                question: `¿Cuál es el promedio de ${numbers.join(', ')}?`,
-                options: shuffleArray([correctAnswer, ...wrongAnswers]),
-                correct: correctAnswer,
-                isFinal: isFinal,
-                theme: 'twice'
-            };
-        }
-
-        // Preguntas avanzadas: 4-5 números, resultados < 200
-        function generateAdvancedAverageQuestion(isFinal) {
-            const numCount = Math.floor(Math.random() * 2) + 4; // 4-5 números
-            const numbers = [];
-            let sum = 0;
-            
-            for (let i = 0; i < numCount; i++) {
-                const num = Math.floor(Math.random() * 60) + 20; // 20-80
-                numbers.push(num);
-                sum += num;
-            }
-            
-            const correctAnswer = Math.round(sum / numCount);
-            
-            // Asegurar que el resultado sea entero y razonable
-            if (correctAnswer > 150 || correctAnswer < 25) {
-                return generateAdvancedAverageQuestion(isFinal);
-            }
-            
-            const wrongAnswers = generateWrongAnswers(correctAnswer, 3);
-            
-            return {
-                question: `¿Cuál es el promedio de ${numbers.join(', ')}?`,
-                options: shuffleArray([correctAnswer, ...wrongAnswers]),
-                correct: correctAnswer,
-                isFinal: isFinal,
-                theme: 'twice'
-            };
-        }
-
-        // Generar respuestas incorrectas apropiadas
-        function generateWrongAnswers(correctAnswer, count) {
-            const wrongAnswers = [];
-            const possibleWrongs = [
-                correctAnswer + 1,
-                correctAnswer - 1,
-                correctAnswer + 2,
-                correctAnswer - 2,
-                correctAnswer + 3,
-                correctAnswer - 3,
-                Math.round(correctAnswer * 1.2),
-                Math.round(correctAnswer * 0.8)
-            ].filter(x => x > 0 && x !== correctAnswer);
-            
-            // Tomar hasta 'count' respuestas incorrectas únicas
-            for (let i = 0; i < Math.min(count, possibleWrongs.length); i++) {
-                if (!wrongAnswers.includes(possibleWrongs[i])) {
-                    wrongAnswers.push(possibleWrongs[i]);
-                }
-            }
-            
-            // Si no hay suficientes, agregar más
-            while (wrongAnswers.length < count) {
-                const extraWrong = correctAnswer + Math.floor(Math.random() * 10) + 1;
-                if (!wrongAnswers.includes(extraWrong) && extraWrong > 0) {
-                    wrongAnswers.push(extraWrong);
-                }
-            }
-            
-            return wrongAnswers.slice(0, count);
+            // Para mantener simplicidad, usar promedios avanzados
+            return generateAverageQuestion(isFinal);
         }
 
         function shuffleArray(array) {
@@ -919,23 +905,19 @@
             const questionContainer = document.getElementById('questionContainer');
             const questionScreen = document.getElementById('questionScreen');
             
-            // Aplicar tema TWICE si es nivel 4
-            if (currentLevel === 4) {
+            if (currentLevel === 5) {
                 questionScreen.classList.add('twice-theme');
             } else {
                 questionScreen.classList.remove('twice-theme');
             }
             
-            // Actualizar contador y barra de progreso
             document.getElementById('currentScore').textContent = `Pregunta ${currentQuestion + 1} de 5`;
             document.getElementById('progressBar').style.width = `${((currentQuestion + 1) / 5) * 100}%`;
             
-            // Mostrar si es la pregunta final
             const finalIndicator = question.isFinal ? 
                 '<div class="final-question">⭐ ¡PREGUNTA DECISIVA! ⭐<br>Esta pregunta determina si pasas al siguiente nivel</div>' : '';
             
-            // Agregar emojis TWICE para nivel 4
-            const twiceEmojis = currentLevel === 4 ? '💖 🎵 💖 ' : '';
+            const twiceEmojis = currentLevel === 5 ? '💖 🎵 💖 ' : '';
             
             questionContainer.innerHTML = `
                 ${finalIndicator}
@@ -954,10 +936,8 @@
             const question = questions[currentQuestion];
             const buttons = document.querySelectorAll('.option-btn');
             
-            // Deshabilitar todos los botones
             buttons.forEach(btn => btn.style.pointerEvents = 'none');
             
-            // Marcar respuesta correcta e incorrecta
             buttons.forEach((btn, index) => {
                 if (btn.textContent === question.correct.toString()) {
                     btn.classList.add('correct');
@@ -969,7 +949,6 @@
                 }
             });
             
-            // Verificar respuesta y reproducir sonido
             if (selectedAnswer === question.correct.toString()) {
                 score++;
                 currentStats.correct++;
@@ -983,9 +962,9 @@
                 currentStats.incorrect++;
                 playIncorrectSound();
                 if (question.isFinal) {
-                setTimeout(() => {
+                    setTimeout(() => {
                         showInfoMessage('😅 No pasaste la pregunta decisiva. ¡Inténtalo de nuevo!');
-                }, 1000);
+                    }, 1000);
                 }
             }
             
@@ -994,7 +973,6 @@
             }, 2000);
         }
 
-        // Función para reproducir sonido correcto
         function playCorrectSound() {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
@@ -1014,7 +992,6 @@
             oscillator.stop(audioContext.currentTime + 0.3);
         }
 
-        // Función para reproducir sonido incorrecto
         function playIncorrectSound() {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
@@ -1045,26 +1022,17 @@
         }
 
         function finishLevel() {
-            const question5 = questions[4];
-            // Verificar si la pregunta decisiva fue respondida correctamente
-            const finalQuestionCorrect = questions[4].correct.toString() === 
+            const finalQuestionCorrect = score >= 1 && questions[4].correct.toString() === 
                 document.querySelector('.option-btn.correct')?.textContent;
             
-            // Calcular tiempo del nivel
             const endTime = Date.now();
-            const timeSpent = Math.round((endTime - startTime) / 1000); // Tiempo en segundos
+            const timeSpent = Math.round((endTime - startTime) / 1000);
             currentStats.time = timeSpent;
             
             levelScores[currentLevel - 1] = score;
             
-            // CRITERIOS PARA PASAR DE NIVEL:
-            // 1. Al menos 3 respuestas correctas (60%)
-            // 2. Responder correctamente la pregunta decisiva (pregunta 5)
             const levelCompleted = score >= 3 && finalQuestionCorrect;
             
-            console.log(`Nivel ${currentLevel}: ${score}/5 correctas, pregunta final: ${finalQuestionCorrect ? 'CORRECTA' : 'INCORRECTA'}, Completado: ${levelCompleted ? 'SÍ' : 'NO'}`);
-            
-            // Guardar estadísticas del jugador
             if (!levelStats[playerName]) {
                 levelStats[playerName] = {};
             }
@@ -1076,54 +1044,29 @@
                 completed: levelCompleted
             };
             
-            // Guardar datos en localStorage
             localStorage.setItem('mateMasterScores', JSON.stringify(levelScores));
             localStorage.setItem('mateMasterStats', JSON.stringify(levelStats));
             
-            // Solo desbloquear siguiente nivel si se cumplen AMBOS criterios
             if (levelCompleted) {
-                if (currentLevel < 4) {
+                if (currentLevel < 5) {
                     unlockedLevels = Math.max(unlockedLevels, currentLevel + 1);
                     localStorage.setItem('mateMasterUnlockedLevels', unlockedLevels.toString());
-                    showLevelCompletedMessage(currentLevel, score, timeSpent, true, false, finalQuestionCorrect);
+                    showLevelCompletedMessage(currentLevel, score, timeSpent, true);
                 } else {
-                    showLevelCompletedMessage(currentLevel, score, timeSpent, false, false, finalQuestionCorrect);
+                    showLevelCompletedMessage(currentLevel, score, timeSpent, false);
                 }
             } else {
-                // No pasó el nivel - mostrar qué faltó
-                const failedFinalQuestion = !finalQuestionCorrect;
-                const insufficientScore = score < 3;
-                showLevelCompletedMessage(currentLevel, score, timeSpent, false, failedFinalQuestion, finalQuestionCorrect, insufficientScore);
+                showLevelCompletedMessage(currentLevel, score, timeSpent, false, true);
             }
-            
-            // Guardar en servidor global (si está disponible)
-            saveToGlobalServer(playerName, currentLevel, {
-                time: timeSpent,
-                correct: currentStats.correct,
-                incorrect: currentStats.incorrect,
-                score: score,
-                completed: levelCompleted
-            });
-            
-            // Guardar en servidor global (si está disponible)
-            saveToGlobalRanking(playerName, currentLevel, {
-                time: timeSpent,
-                correct: currentStats.correct,
-                incorrect: currentStats.incorrect,
-                score: score,
-                completed: levelCompleted
-            });
         }
 
-        // Función para mostrar mensaje de nivel completado con botones apropiados
-        function showLevelCompletedMessage(level, score, timeSpent, levelUnlocked, failedFinalQuestion = false, finalQuestionCorrect = true, insufficientScore = false) {
+        function showLevelCompletedMessage(level, score, timeSpent, levelUnlocked, failed = false) {
             let message = '';
             let buttonText = '';
             let buttonAction = '';
             let buttonColor = '';
             
-            // NIVEL COMPLETADO EXITOSAMENTE
-            if (score >= 3 && finalQuestionCorrect) {
+            if (!failed) {
                 if (levelUnlocked) {
                     message = `🎉 ¡INCREÍBLE ${playerName}! 
                                Completaste el nivel ${level} con ${score}/5 puntos en ${timeSpent} segundos.
@@ -1134,28 +1077,20 @@
                 } else {
                     message = `🏆 ¡FELICITACIONES ${playerName}! 
                                Completaste el nivel ${level} con ${score}/5 puntos en ${timeSpent} segundos.
-                               ¡Has completado todos los niveles de MateMaster! 🌟`;
+                               ¡Has completado todos los niveles de MateMaster! 🌟
+                               ¡Eres un verdadero TWICE Master matemático! 💖`;
                     buttonText = '🏆 Ver Niveles Completados';
                     buttonAction = 'backToLevels()';
                     buttonColor = '#667eea';
                 }
             } else {
-                // NIVEL NO COMPLETADO - Mostrar razones específicas
-                message = `😔 ${playerName}, obtuviste ${score}/5 puntos en ${timeSpent} segundos.`;
-                
-                let reasons = [];
-                if (insufficientScore) {
-                    reasons.push('❌ Necesitas al menos 3 respuestas correctas');
-                }
-                if (failedFinalQuestion) {
-                    reasons.push('❌ Debes responder correctamente la pregunta decisiva (pregunta 5)');
-                }
-                
-                if (reasons.length > 0) {
-                    message += `\n\n📋 Para avanzar al siguiente nivel necesitas:\n${reasons.join('\n')}`;
-                }
-                
-                message += '\n\n💪 ¡No te rindas! Con práctica puedes lograrlo.';
+                message = `😔 ${playerName}, obtuviste ${score}/5 puntos en ${timeSpent} segundos.
+                           
+                           📋 Para avanzar necesitas:
+                           ❌ Al menos 3 respuestas correctas
+                           ❌ Responder correctamente la pregunta decisiva
+                           
+                           💪 ¡No te rindas! Con práctica puedes lograrlo.`;
                 
                 buttonText = `🔄 Intentar Nivel ${level} de Nuevo`;
                 buttonAction = `selectLevel(${level})`;
@@ -1181,7 +1116,7 @@
             
             messageDiv.innerHTML = `
                 <div style="font-size: 3em; margin-bottom: 20px;">
-                    ${score >= 3 && !failedFinalQuestion ? '🎉' : '🎯'}
+                    ${!failed ? '🎉' : '🎯'}
                 </div>
                 <div style="color: #4a5568; line-height: 1.6; margin-bottom: 30px;">
                     ${message}
@@ -1221,21 +1156,15 @@
             document.body.appendChild(messageDiv);
         }
 
-        // Función para ir al siguiente nivel
         function goToNextLevel() {
-            // Cerrar el modal
             document.querySelector('[style*="position: fixed"]').remove();
-            // Actualizar las tarjetas de nivel
             updateLevelCards();
-            // Ir a la pantalla de niveles
             backToLevels();
-            // Mostrar mensaje de nivel desbloqueado
             setTimeout(() => {
                 showInfoMessage(`🎯 ¡Nivel ${currentLevel + 1} desbloqueado! ¡Haz clic en la tarjeta para jugar!`);
             }, 500);
         }
 
-        // Función para mostrar mensajes de éxito
         function showSuccessMessage(message) {
             const messageDiv = document.createElement('div');
             messageDiv.style.cssText = `
@@ -1271,7 +1200,6 @@
             document.body.appendChild(messageDiv);
         }
 
-        // Función para mostrar mensajes informativos
         function showInfoMessage(message) {
             const messageDiv = document.createElement('div');
             messageDiv.style.cssText = `
@@ -1311,13 +1239,11 @@
             document.getElementById('questionScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
             updateLevelCards();
-            // Actualizar ranking al volver
-            loadTopPlayers();
         }
 
         function resetProgress() {
             if (confirm('¿Estás seguro de que quieres reiniciar todo el progreso? Esto no se puede deshacer.')) {
-                levelScores = [0, 0, 0, 0];
+                levelScores = [0, 0, 0, 0, 0];
                 unlockedLevels = 1;
                 localStorage.removeItem('mateMasterScores');
                 localStorage.removeItem('mateMasterUnlockedLevels');
@@ -1328,403 +1254,25 @@
             }
         }
 
-
-
         function handleKeyPress(event) {
             if (event.key === 'Enter') {
                 startGame();
             }
         }
 
-        // Función para guardar en servidor global
-            async function saveToGlobalServer(playerName, level, stats) {
-        try {
-            // Usar la URL de Railway si está disponible, sino localhost
-            const serverUrl = window.location.hostname === 'localhost' 
-                ? 'http://localhost:3000' 
-                : `https://${window.location.hostname}`;
-            
-            const response = await fetch(`${serverUrl}/api/rankings`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        playerName: playerName,
-                        level: level,
-                        stats: stats
-                    })
-                });
-                
-                if (response.ok) {
-                    console.log('Estadísticas guardadas en servidor global');
-                } else {
-                    console.log('Servidor no disponible, guardando solo localmente');
-                }
-            } catch (error) {
-                console.log('Servidor no disponible, guardando solo localmente');
-            }
+        // Simplificar las funciones de ranking para evitar complejidad
+        function showCompleteRanking() {
+            showInfoMessage('📊 Función de ranking completo disponible próximamente. ¡Sigue jugando para mejorar tu puntuación!');
         }
 
-        // Función para obtener ranking global
-            async function getGlobalRanking() {
-        try {
-            // Usar la URL de Railway si está disponible, sino localhost
-            const serverUrl = window.location.hostname === 'localhost' 
-                ? 'http://localhost:3000' 
-                : `https://${window.location.hostname}`;
-            
-            const response = await fetch(`${serverUrl}/api/rankings`);
-                if (response.ok) {
-                    const globalRanking = await response.json();
-                    return globalRanking;
-                } else {
-                    console.log('Servidor no disponible, usando ranking local');
-                    return getLocalRanking();
-                }
-            } catch (error) {
-                console.log('Servidor no disponible, usando ranking local');
-                return getLocalRanking();
-            }
+        function testServerConnection() {
+            showInfoMessage('🔧 Conexión con servidor en desarrollo. Los datos se guardan localmente por ahora.');
         }
 
-        // Función para obtener ranking local como fallback
-        function getLocalRanking() {
-            const localStats = JSON.parse(localStorage.getItem('mateMasterStats')) || {};
-            const rankings = [];
-            
-            Object.keys(localStats).forEach(playerName => {
-                const playerData = localStats[playerName];
-                let totalTime = 0;
-                let totalCorrect = 0;
-                let totalIncorrect = 0;
-                let completedLevels = 0;
-                
-                for (let level = 1; level <= 4; level++) {
-                    const levelData = playerData[`level${level}`];
-                    if (levelData && levelData.completed) {
-                        totalTime += levelData.time;
-                        totalCorrect += levelData.correct;
-                        totalIncorrect += levelData.incorrect;
-                        completedLevels++;
-                    }
-                }
-                
-                if (completedLevels > 0) {
-                    rankings.push({
-                        name: playerName,
-                        totalTime,
-                        totalCorrect,
-                        totalIncorrect,
-                        completedLevels
-                    });
-                }
-            });
-            
-            return rankings.sort((a, b) => a.totalTime - b.totalTime);
-        }
-
-        // Función para cargar los top 5 jugadores al inicio
-        async function loadTopPlayers() {
-            try {
-                const rankings = await getGlobalRanking();
-                const topPlayersContainer = document.getElementById('topPlayers');
-                
-                if (rankings.length === 0) {
-                    topPlayersContainer.innerHTML = '<div class="loading">No hay jugadores aún. ¡Sé el primero!</div>';
-                    return;
-                }
-                
-                const top5 = rankings.slice(0, 5);
-                let html = '';
-                
-                top5.forEach((player, index) => {
-                    const rank = index + 1;
-                    const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏅';
-                    const timeFormatted = formatTime(player.totalTime);
-                    const totalQuestions = player.totalCorrect + player.totalIncorrect;
-                    const accuracy = totalQuestions > 0 ? Math.round((player.totalCorrect / totalQuestions) * 100) : 0;
-                    const averageTime = player.completedLevels > 0 ? Math.round(player.totalTime / player.completedLevels) : 0;
-                    
-                    html += `
-                        <div class="player-card" onclick="showPlayerDetails('${player.name}')">
-                            <div class="player-rank">${rankEmoji}</div>
-                            <div class="player-info">
-                                <div class="player-name">${player.name}</div>
-                                <div class="player-stats">
-                                    ⏱️ ${formatTime(averageTime)} | 🎯 ${accuracy}% | ✅ ${player.totalCorrect} | ❌ ${player.totalIncorrect} | 🏆 ${player.completedLevels}/4
-                                </div>
-                            </div>
-                            <div style="font-size: 0.8em; opacity: 0.7;">👁️ Ver detalles</div>
-                        </div>
-                    `;
-                });
-                
-                topPlayersContainer.innerHTML = html;
-            } catch (error) {
-                document.getElementById('topPlayers').innerHTML = '<div class="loading">Error cargando ranking</div>';
-            }
-        }
-
-        // Función para mostrar detalles del jugador
-        function showPlayerDetails(playerName) {
-            const localStats = JSON.parse(localStorage.getItem('mateMasterStats')) || {};
-            const playerData = localStats[playerName];
-            
-            if (!playerData) {
-                showInfoMessage('No hay datos detallados para este jugador.');
-                return;
-            }
-            
-            let detailsHtml = `
-                <div style="background: white; border-radius: 15px; padding: 25px; margin: 20px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-                    <h3 style="text-align: center; color: #4a5568; margin-bottom: 20px;">📊 Detalles de ${playerName}</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            `;
-            
-            for (let level = 1; level <= 4; level++) {
-                const levelData = playerData[`level${level}`];
-                if (levelData) {
-                    const accuracy = levelData.correct + levelData.incorrect > 0 
-                        ? Math.round((levelData.correct / (levelData.correct + levelData.incorrect)) * 100)
-                        : 0;
-                    
-                    detailsHtml += `
-                        <div style="
-                            background: ${levelData.completed ? '#f0fff4' : '#fed7d7'};
-                            border: 2px solid ${levelData.completed ? '#48bb78' : '#f56565'};
-                            border-radius: 10px;
-                            padding: 15px;
-                        ">
-                            <h4 style="color: ${levelData.completed ? '#38a169' : '#e53e3e'}; margin-bottom: 10px;">
-                                🎯 Nivel ${level} ${levelData.completed ? '✅' : '❌'}
-                            </h4>
-                            <div style="font-size: 0.9em; line-height: 1.4;">
-                                <p>⏱️ Tiempo: ${formatTime(levelData.time)}</p>
-                                <p>✅ Correctas: ${levelData.correct}</p>
-                                <p>❌ Incorrectas: ${levelData.incorrect}</p>
-                                <p>🏆 Puntuación: ${levelData.score}/5</p>
-                                <p>🎯 Precisión: ${accuracy}%</p>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-            
-            detailsHtml += `
-                    </div>
-                    <div style="text-align: center; margin-top: 20px;">
-                        <button onclick="this.parentElement.parentElement.remove()" style="
-                            background: linear-gradient(135deg, #667eea, #764ba2);
-                            color: white;
-                            border: none;
-                            padding: 10px 20px;
-                            border-radius: 8px;
-                            cursor: pointer;
-                            font-family: inherit;
-                        ">Cerrar</button>
-                    </div>
-                </div>
-            `;
-            
-            // Crear modal
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 1000;
-            `;
-            modal.innerHTML = detailsHtml;
-            modal.onclick = function(e) {
-                if (e.target === modal) modal.remove();
-            };
-            document.body.appendChild(modal);
-        }
-
-        // Función para formatear tiempo
-        function formatTime(seconds) {
-            if (seconds < 60) {
-                return `${seconds}s`;
-            } else if (seconds < 3600) {
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
-                return `${minutes}m ${remainingSeconds}s`;
-            } else {
-                const hours = Math.floor(seconds / 3600);
-                const minutes = Math.floor((seconds % 3600) / 60);
-                return `${hours}h ${minutes}m`;
-            }
-        }
-
-        // Función para mostrar ranking completo con estadísticas
-        async function showCompleteRanking() {
-            try {
-                const rankings = await getGlobalRanking();
-                
-                if (rankings.length === 0) {
-                    showInfoMessage('No hay jugadores aún. ¡Sé el primero!');
-                    return;
-                }
-                
-                // Calcular estadísticas adicionales
-                const detailedRankings = rankings.map(player => {
-                    const totalQuestions = player.totalCorrect + player.totalIncorrect;
-                    const accuracy = totalQuestions > 0 ? Math.round((player.totalCorrect / totalQuestions) * 100) : 0;
-                    const averageTime = player.completedLevels > 0 ? Math.round(player.totalTime / player.completedLevels) : 0;
-                    
-                    return {
-                        ...player,
-                        accuracy,
-                        averageTime
-                    };
-                });
-                
-                let rankingHtml = `
-                    <div style="
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background: rgba(0,0,0,0.8);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                        overflow-y: auto;
-                        padding: 20px;
-                    ">
-                        <div style="
-                            background: white;
-                            border-radius: 20px;
-                            padding: 30px;
-                            max-width: 90%;
-                            max-height: 90%;
-                            overflow-y: auto;
-                            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-                        ">
-                            <div style="text-align: center; margin-bottom: 25px;">
-                                <h2 style="color: #2d3748; font-size: 2em; margin-bottom: 10px;">📊 Estadísticas Completas del Ranking</h2>
-                                <p style="color: #718096; font-size: 1.1em;">Total de jugadores: ${rankings.length}</p>
-                            </div>
-                            
-                            <div style="
-                                background: #f7fafc;
-                                border-radius: 15px;
-                                padding: 20px;
-                                margin-bottom: 25px;
-                            ">
-                                <h3 style="color: #4a5568; margin-bottom: 15px; text-align: center;">📈 Resumen General</h3>
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; text-align: center;">
-                                    <div style="padding: 15px; background: #f0fff4; border-radius: 10px; border: 2px solid #48bb78;">
-                                        <div style="font-size: 1.8em; font-weight: bold; color: #38a169;">${rankings.length}</div>
-                                        <div style="font-size: 0.9em; color: #4a5568;">Total Jugadores</div>
-                                    </div>
-                                    <div style="padding: 15px; background: #fef5e7; border-radius: 10px; border: 2px solid #f6ad55;">
-                                        <div style="font-size: 1.8em; font-weight: bold; color: #d69e2e;">${Math.round(rankings.reduce((sum, p) => sum + p.totalCorrect, 0) / rankings.length)}</div>
-                                        <div style="font-size: 0.9em; color: #4a5568;">Promedio Correctas</div>
-                                    </div>
-                                    <div style="padding: 15px; background: #fed7d7; border-radius: 10px; border: 2px solid #f56565;">
-                                        <div style="font-size: 1.8em; font-weight: bold; color: #e53e3e;">${Math.round(rankings.reduce((sum, p) => sum + p.totalIncorrect, 0) / rankings.length)}</div>
-                                        <div style="font-size: 0.9em; color: #4a5568;">Promedio Incorrectas</div>
-                                    </div>
-                                    <div style="padding: 15px; background: #e6fffa; border-radius: 10px; border: 2px solid #319795;">
-                                        <div style="font-size: 1.8em; font-weight: bold; color: #319795;">${formatTime(Math.round(rankings.reduce((sum, p) => sum + p.totalTime, 0) / rankings.length))}</div>
-                                        <div style="font-size: 0.9em; color: #4a5568;">Tiempo Promedio</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div style="overflow-x: auto;">
-                                <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                                    <thead>
-                                        <tr style="background: #4a5568; color: white;">
-                                            <th style="padding: 12px; text-align: left;">Rank</th>
-                                            <th style="padding: 12px; text-align: left;">Jugador</th>
-                                            <th style="padding: 12px; text-align: center;">⏱️ Tiempo Promedio</th>
-                                            <th style="padding: 12px; text-align: center;">🎯 Precisión</th>
-                                            <th style="padding: 12px; text-align: center;">✅ Correctas</th>
-                                            <th style="padding: 12px; text-align: center;">❌ Incorrectas</th>
-                                            <th style="padding: 12px; text-align: center;">🏆 Niveles</th>
-                                            <th style="padding: 12px; text-align: center;">📊 Detalles</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                `;
-                
-                detailedRankings.forEach((player, index) => {
-                    const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅';
-                    const accuracyColor = player.accuracy >= 90 ? '#48bb78' : player.accuracy >= 80 ? '#38a169' : player.accuracy >= 70 ? '#f6ad55' : player.accuracy >= 60 ? '#f56565' : '#e53e3e';
-                    
-                    rankingHtml += `
-                        <tr style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#f7fafc' : 'white'};">
-                            <td style="padding: 12px; font-weight: bold;">${rankEmoji} ${index + 1}</td>
-                            <td style="padding: 12px; font-weight: bold;">${player.name}</td>
-                            <td style="padding: 12px; text-align: center;">${formatTime(player.averageTime)}</td>
-                            <td style="padding: 12px; text-align: center;">
-                                <span style="color: ${accuracyColor}; font-weight: bold;">${player.accuracy}%</span>
-                            </td>
-                            <td style="padding: 12px; text-align: center; color: #48bb78;">${player.totalCorrect}</td>
-                            <td style="padding: 12px; text-align: center; color: #f56565;">${player.totalIncorrect}</td>
-                            <td style="padding: 12px; text-align: center;">${player.completedLevels}/4</td>
-                            <td style="padding: 12px; text-align: center;">
-                                <button onclick="showPlayerDetails('${player.name}')" style="
-                                    padding: 5px 10px;
-                                    border-radius: 5px;
-                                    border: 1px solid #cbd5e0;
-                                    background: #fff;
-                                    cursor: pointer;
-                                    font-size: 0.9em;
-                                ">👁️ Ver</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                rankingHtml += `
-                                    </tbody>
-                                </table>
-                            </div>
-                            
-                            <div style="text-align: center; margin-top: 25px;">
-                                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
-                                    background: linear-gradient(135deg, #667eea, #764ba2);
-                                    color: white;
-                                    border: none;
-                                    padding: 15px 30px;
-                                    border-radius: 10px;
-                                    cursor: pointer;
-                                    font-family: inherit;
-                                    font-size: 1.1em;
-                                    font-weight: bold;
-                                ">Cerrar</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                // Crear modal
-                const modal = document.createElement('div');
-                modal.innerHTML = rankingHtml;
-                modal.onclick = function(e) {
-                    if (e.target === modal) modal.remove();
-                };
-                document.body.appendChild(modal);
-                
-            } catch (error) {
-                showInfoMessage('Error cargando estadísticas completas.');
-            }
-        }
-
-        // Cargar ranking al inicio
-        loadTopPlayers();
+        // Cargar progreso al iniciar
+        window.addEventListener('load', function() {
+            updateLevelCards();
+        });
     </script>
 </body>
 </html>
