@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+fix<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -1058,6 +1058,15 @@
             } else {
                 showLevelCompletedMessage(currentLevel, score, timeSpent, false, true);
             }
+            
+            // Guardar en servidor global (si está disponible)
+            saveToGlobalServer(playerName, currentLevel, {
+                time: timeSpent,
+                correct: currentStats.correct,
+                incorrect: currentStats.incorrect,
+                score: score,
+                completed: levelCompleted
+            });
         }
 
         function showLevelCompletedMessage(level, score, timeSpent, levelUnlocked, failed = false) {
@@ -1260,18 +1269,452 @@
             }
         }
 
-        // Simplificar las funciones de ranking para evitar complejidad
-        function showCompleteRanking() {
-            showInfoMessage('📊 Función de ranking completo disponible próximamente. ¡Sigue jugando para mejorar tu puntuación!');
+        // Función para guardar en servidor global
+        async function saveToGlobalServer(playerName, level, stats) {
+            try {
+                const serverUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000' 
+                    : window.location.origin;
+                
+                console.log(`Intentando guardar en servidor: ${serverUrl}/api/rankings`);
+                console.log('Datos a enviar:', { playerName, level, stats });
+                
+                const response = await fetch(`${serverUrl}/api/rankings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        playerName: playerName,
+                        level: level,
+                        stats: stats
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Estadísticas guardadas en servidor global:', result);
+                } else {
+                    const errorText = await response.text();
+                    console.error('❌ Error del servidor:', response.status, errorText);
+                    console.log('Guardando solo localmente como fallback');
+                }
+            } catch (error) {
+                console.error('❌ Error de conexión con servidor:', error);
+                console.log('Guardando solo localmente como fallback');
+            }
         }
 
-        function testServerConnection() {
-            showInfoMessage('🔧 Conexión con servidor en desarrollo. Los datos se guardan localmente por ahora.');
+        // Función para obtener ranking global
+        async function getGlobalRanking() {
+            try {
+                const serverUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000' 
+                    : window.location.origin;
+                
+                console.log(`Obteniendo ranking desde: ${serverUrl}/api/rankings`);
+                
+                const response = await fetch(`${serverUrl}/api/rankings`);
+                if (response.ok) {
+                    const globalRanking = await response.json();
+                    console.log('✅ Ranking obtenido del servidor:', globalRanking.length, 'jugadores');
+                    return globalRanking;
+                } else {
+                    console.error('❌ Error obteniendo ranking del servidor:', response.status);
+                    console.log('Usando ranking local como fallback');
+                    return getLocalRanking();
+                }
+            } catch (error) {
+                console.error('❌ Error de conexión obteniendo ranking:', error);
+                console.log('Usando ranking local como fallback');
+                return getLocalRanking();
+            }
+        }
+
+        // Función para obtener ranking local como fallback
+        function getLocalRanking() {
+            const localStats = JSON.parse(localStorage.getItem('mateMasterStats')) || {};
+            const rankings = [];
+            
+            Object.keys(localStats).forEach(playerName => {
+                const playerData = localStats[playerName];
+                let totalTime = 0;
+                let totalCorrect = 0;
+                let totalIncorrect = 0;
+                let completedLevels = 0;
+                
+                for (let level = 1; level <= 5; level++) {
+                    const levelData = playerData[`level${level}`];
+                    if (levelData && levelData.completed) {
+                        totalTime += levelData.time;
+                        totalCorrect += levelData.correct;
+                        totalIncorrect += levelData.incorrect;
+                        completedLevels++;
+                    }
+                }
+                
+                if (completedLevels > 0) {
+                    rankings.push({
+                        name: playerName,
+                        totalTime,
+                        totalCorrect,
+                        totalIncorrect,
+                        completedLevels
+                    });
+                }
+            });
+            
+            return rankings.sort((a, b) => a.totalTime - b.totalTime);
+        }
+
+        // Función para cargar los top 5 jugadores al inicio
+        async function loadTopPlayers() {
+            try {
+                const rankings = await getGlobalRanking();
+                const topPlayersContainer = document.getElementById('topPlayers');
+                
+                if (rankings.length === 0) {
+                    topPlayersContainer.innerHTML = '<div class="loading">No hay jugadores aún. ¡Sé el primero!</div>';
+                    return;
+                }
+                
+                const top5 = rankings.slice(0, 5);
+                let html = '';
+                
+                top5.forEach((player, index) => {
+                    const rank = index + 1;
+                    const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏅';
+                    const totalQuestions = player.totalCorrect + player.totalIncorrect;
+                    const accuracy = totalQuestions > 0 ? Math.round((player.totalCorrect / totalQuestions) * 100) : 0;
+                    const averageTime = player.completedLevels > 0 ? Math.round(player.totalTime / player.completedLevels) : 0;
+                    
+                    html += `
+                        <div class="player-card" onclick="showPlayerDetails('${player.name}')">
+                            <div class="player-rank">${rankEmoji}</div>
+                            <div class="player-info">
+                                <div class="player-name">${player.name}</div>
+                                <div class="player-stats">
+                                    ⏱️ ${formatTime(averageTime)} | 🎯 ${accuracy}% | ✅ ${player.totalCorrect} | ❌ ${player.totalIncorrect} | 🏆 ${player.completedLevels}/5
+                                </div>
+                            </div>
+                            <div style="font-size: 0.8em; opacity: 0.7;">👁️ Ver detalles</div>
+                        </div>
+                    `;
+                });
+                
+                topPlayersContainer.innerHTML = html;
+            } catch (error) {
+                document.getElementById('topPlayers').innerHTML = '<div class="loading">Error cargando ranking</div>';
+            }
+        }
+
+        // Función para formatear tiempo
+        function formatTime(seconds) {
+            if (seconds < 60) {
+                return `${seconds}s`;
+            } else if (seconds < 3600) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes}m ${remainingSeconds}s`;
+            } else {
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                return `${hours}h ${minutes}m`;
+            }
+        }
+
+        // Función para mostrar detalles del jugador
+        function showPlayerDetails(playerName) {
+            const localStats = JSON.parse(localStorage.getItem('mateMasterStats')) || {};
+            const playerData = localStats[playerName];
+            
+            if (!playerData) {
+                showInfoMessage('No hay datos detallados para este jugador.');
+                return;
+            }
+            
+            let detailsHtml = `
+                <div style="background: white; border-radius: 15px; padding: 25px; margin: 20px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                    <h3 style="text-align: center; color: #4a5568; margin-bottom: 20px;">📊 Detalles de ${playerName}</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            `;
+            
+            for (let level = 1; level <= 5; level++) {
+                const levelData = playerData[`level${level}`];
+                if (levelData) {
+                    const accuracy = levelData.correct + levelData.incorrect > 0 
+                        ? Math.round((levelData.correct / (levelData.correct + levelData.incorrect)) * 100)
+                        : 0;
+                    
+                    const levelNames = {
+                        1: 'Operaciones Combinadas',
+                        2: 'Divisiones Simples', 
+                        3: 'Divisiones con Resto',
+                        4: 'Promedios',
+                        5: 'TWICE Master'
+                    };
+                    
+                    detailsHtml += `
+                        <div style="
+                            background: ${levelData.completed ? '#f0fff4' : '#fed7d7'};
+                            border: 2px solid ${levelData.completed ? '#48bb78' : '#f56565'};
+                            border-radius: 10px;
+                            padding: 15px;
+                        ">
+                            <h4 style="color: ${levelData.completed ? '#38a169' : '#e53e3e'}; margin-bottom: 10px;">
+                                🎯 Nivel ${level}: ${levelNames[level]} ${levelData.completed ? '✅' : '❌'}
+                            </h4>
+                            <div style="font-size: 0.9em; line-height: 1.4;">
+                                <p>⏱️ Tiempo: ${formatTime(levelData.time)}</p>
+                                <p>✅ Correctas: ${levelData.correct}</p>
+                                <p>❌ Incorrectas: ${levelData.incorrect}</p>
+                                <p>🏆 Puntuación: ${levelData.score}/5</p>
+                                <p>🎯 Precisión: ${accuracy}%</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            detailsHtml += `
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="this.parentElement.parentElement.remove()" style="
+                            background: linear-gradient(135deg, #667eea, #764ba2);
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-family: inherit;
+                        ">Cerrar</button>
+                    </div>
+                </div>
+            `;
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+            modal.innerHTML = detailsHtml;
+            modal.onclick = function(e) {
+                if (e.target === modal) modal.remove();
+            };
+            document.body.appendChild(modal);
+        }
+
+        // Función para mostrar ranking completo con estadísticas
+        async function showCompleteRanking() {
+            try {
+                const rankings = await getGlobalRanking();
+                
+                if (rankings.length === 0) {
+                    showInfoMessage('No hay jugadores aún. ¡Sé el primero!');
+                    return;
+                }
+                
+                const detailedRankings = rankings.map(player => {
+                    const totalQuestions = player.totalCorrect + player.totalIncorrect;
+                    const accuracy = totalQuestions > 0 ? Math.round((player.totalCorrect / totalQuestions) * 100) : 0;
+                    const averageTime = player.completedLevels > 0 ? Math.round(player.totalTime / player.completedLevels) : 0;
+                    
+                    return {
+                        ...player,
+                        accuracy,
+                        averageTime
+                    };
+                });
+                
+                let rankingHtml = `
+                    <div style="
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.8);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 1000;
+                        overflow-y: auto;
+                        padding: 20px;
+                    ">
+                        <div style="
+                            background: white;
+                            border-radius: 20px;
+                            padding: 30px;
+                            max-width: 90%;
+                            max-height: 90%;
+                            overflow-y: auto;
+                            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                        ">
+                            <div style="text-align: center; margin-bottom: 25px;">
+                                <h2 style="color: #2d3748; font-size: 2em; margin-bottom: 10px;">📊 Estadísticas Completas del Ranking</h2>
+                                <p style="color: #718096; font-size: 1.1em;">Total de jugadores: ${rankings.length}</p>
+                            </div>
+                            
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                    <thead>
+                                        <tr style="background: #4a5568; color: white;">
+                                            <th style="padding: 12px; text-align: left;">Rank</th>
+                                            <th style="padding: 12px; text-align: left;">Jugador</th>
+                                            <th style="padding: 12px; text-align: center;">⏱️ Tiempo Promedio</th>
+                                            <th style="padding: 12px; text-align: center;">🎯 Precisión</th>
+                                            <th style="padding: 12px; text-align: center;">✅ Correctas</th>
+                                            <th style="padding: 12px; text-align: center;">❌ Incorrectas</th>
+                                            <th style="padding: 12px; text-align: center;">🏆 Niveles</th>
+                                            <th style="padding: 12px; text-align: center;">📊 Detalles</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                `;
+                
+                detailedRankings.forEach((player, index) => {
+                    const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅';
+                    const accuracyColor = player.accuracy >= 90 ? '#48bb78' : player.accuracy >= 80 ? '#38a169' : player.accuracy >= 70 ? '#f6ad55' : player.accuracy >= 60 ? '#f56565' : '#e53e3e';
+                    
+                    rankingHtml += `
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#f7fafc' : 'white'};">
+                            <td style="padding: 12px; font-weight: bold;">${rankEmoji} ${index + 1}</td>
+                            <td style="padding: 12px; font-weight: bold;">${player.name}</td>
+                            <td style="padding: 12px; text-align: center;">${formatTime(player.averageTime)}</td>
+                            <td style="padding: 12px; text-align: center;">
+                                <span style="color: ${accuracyColor}; font-weight: bold;">${player.accuracy}%</span>
+                            </td>
+                            <td style="padding: 12px; text-align: center; color: #48bb78;">${player.totalCorrect}</td>
+                            <td style="padding: 12px; text-align: center; color: #f56565;">${player.totalIncorrect}</td>
+                            <td style="padding: 12px; text-align: center;">${player.completedLevels}/5</td>
+                            <td style="padding: 12px; text-align: center;">
+                                <button onclick="showPlayerDetails('${player.name}')" style="
+                                    padding: 5px 10px;
+                                    border-radius: 5px;
+                                    border: 1px solid #cbd5e0;
+                                    background: #fff;
+                                    cursor: pointer;
+                                    font-size: 0.9em;
+                                ">👁️ Ver</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                rankingHtml += `
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 25px;">
+                                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
+                                    background: linear-gradient(135deg, #667eea, #764ba2);
+                                    color: white;
+                                    border: none;
+                                    padding: 15px 30px;
+                                    border-radius: 10px;
+                                    cursor: pointer;
+                                    font-family: inherit;
+                                    font-size: 1.1em;
+                                    font-weight: bold;
+                                ">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                const modal = document.createElement('div');
+                modal.innerHTML = rankingHtml;
+                modal.onclick = function(e) {
+                    if (e.target === modal) modal.remove();
+                };
+                document.body.appendChild(modal);
+                
+            } catch (error) {
+                showInfoMessage('Error cargando estadísticas completas.');
+            }
+        }
+
+        // Función para probar conexión con servidor
+        async function testServerConnection() {
+            try {
+                const serverUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000' 
+                    : window.location.origin;
+                
+                showInfoMessage('🔧 Probando conexión con servidor...');
+                
+                // Probar healthcheck
+                const healthResponse = await fetch(`${serverUrl}/health`);
+                if (!healthResponse.ok) {
+                    throw new Error(`Health check failed: ${healthResponse.status}`);
+                }
+                const healthData = await healthResponse.json();
+                
+                // Probar envío de datos de prueba
+                const testData = {
+                    playerName: 'TEST_USER',
+                    level: 1,
+                    stats: {
+                        time: 30,
+                        correct: 3,
+                        incorrect: 2,
+                        score: 3,
+                        completed: true
+                    }
+                };
+                
+                const saveResponse = await fetch(`${serverUrl}/api/rankings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                if (!saveResponse.ok) {
+                    throw new Error(`Save test failed: ${saveResponse.status}`);
+                }
+                const saveData = await saveResponse.json();
+                
+                // Probar obtención de datos
+                const getRankingsResponse = await fetch(`${serverUrl}/api/rankings`);
+                if (!getRankingsResponse.ok) {
+                    throw new Error(`Get rankings failed: ${getRankingsResponse.status}`);
+                }
+                const rankingsData = await getRankingsResponse.json();
+                
+                showSuccessMessage(`✅ Servidor funcionando correctamente!
+                
+                🔗 URL: ${serverUrl}
+                💚 Health: ${healthData.status}
+                📊 Jugadores: ${saveData.totalPlayers}
+                📈 Rankings: ${rankingsData.length} jugadores con niveles completados
+                
+                ¡El ranking se está guardando en la base de datos del servidor!`);
+                
+            } catch (error) {
+                console.error('❌ Error probando servidor:', error);
+                showInfoMessage(`❌ Error de conexión con servidor:
+                
+                ${error.message}
+                
+                El ranking solo se está guardando localmente en tu navegador. Verifica que el servidor esté funcionando correctamente.`);
+            }
         }
 
         // Cargar progreso al iniciar
         window.addEventListener('load', function() {
             updateLevelCards();
+            loadTopPlayers();
         });
     </script>
 </body>
