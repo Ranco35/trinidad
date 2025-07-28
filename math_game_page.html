@@ -579,9 +579,9 @@
                      <strong>OOO GRAN TRINIDAD LA MASTER DE LAS MATEMÁTICAS</strong><br>
                      ¡BIENVENIDA A TU REINO DE LOS NÚMEROS! 🎯✨`;
             } else {
-                const characteristic = getNameCharacteristic(playerName);
-                document.getElementById('playerInfo').innerHTML = 
-                    `🎭 ¡Hola ${playerName}! Tu nombre significa que eres <strong>${characteristic}</strong>. ¡Perfecto para ser un MateMaster!`;
+            const characteristic = getNameCharacteristic(playerName);
+            document.getElementById('playerInfo').innerHTML = 
+                `🎭 ¡Hola ${playerName}! Tu nombre significa que eres <strong>${characteristic}</strong>. ¡Perfecto para ser un MateMaster!`;
             }
 
             // OCULTAR pantalla de bienvenida y ranking
@@ -808,7 +808,7 @@
                 (a - b) + c * d,
                 correctAnswer + Math.floor(Math.random() * 100) + 30
             ].filter(x => x > 0 && x !== correctAnswer);
-
+            
             return {
                 question: `${a} - (${b} + ${c} × ${d}) =`,
                 options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
@@ -850,7 +850,7 @@
                 `${quotient} resto ${remainder + 1}`,
                 `${quotient - 1} resto ${remainder}`
             ];
-
+            
             return {
                 question: `¿Cuánto es ${dividend} ÷ ${divisor}? (con resto)`,
                 options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
@@ -877,7 +877,7 @@
                 correctAnswer - Math.floor(Math.random() * 5) + 1,
                 Math.round(correctAnswer * 1.2)
             ].filter(x => x > 0 && x !== correctAnswer);
-
+            
             return {
                 question: `Calcula el promedio de: ${numbers.join(' - ')}`,
                 options: shuffleArray([correctAnswer, ...wrongAnswers.slice(0, 3)]),
@@ -962,9 +962,9 @@
                 currentStats.incorrect++;
                 playIncorrectSound();
                 if (question.isFinal) {
-                    setTimeout(() => {
+                setTimeout(() => {
                         showInfoMessage('😅 No pasaste la pregunta decisiva. ¡Inténtalo de nuevo!');
-                    }, 1000);
+                }, 1000);
                 }
             }
             
@@ -1719,8 +1719,8 @@
                 } else {
                     diagnosticInfo = `
 🔍 DETALLES DEL ERROR:
-${error.message}
-
+                ${error.message}
+                
 💡 RECOMENDACIONES:
 1. Verificar que el servidor Node.js esté corriendo
 2. Revisar la consola del navegador (F12) para más detalles
@@ -1740,7 +1740,7 @@ ${error.message}
         // Cargar progreso al iniciar
         window.addEventListener('load', function() {
             updateLevelCards();
-            loadTopPlayers();
+        loadTopPlayers();
         });
     </script>
 </body>

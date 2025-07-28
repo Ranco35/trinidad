@@ -6,8 +6,23 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+
+// Manejar preflight requests
+app.options('*', (req, res) => {
+    console.log('🔄 Preflight request recibido para:', req.path);
+    res.set({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    });
+    res.status(200).end();
+});
 
 // Servir archivos estáticos desde la raíz
 app.use(express.static(path.join(__dirname)));
@@ -34,7 +49,7 @@ app.get('/api/rankings', (req, res) => {
             let completedLevels = 0;
             
             // Calcular estadísticas basadas en los datos guardados
-            for (let level = 1; level <= 4; level++) {
+            for (let level = 1; level <= 5; level++) {
                 const levelData = player.stats[`level${level}`];
                 if (levelData && levelData.completed) {
                     totalTime += levelData.time;
@@ -130,12 +145,28 @@ app.get('/static/*', (req, res) => {
 
 // Ruta para healthcheck
 app.get('/health', (req, res) => {
-    res.status(200).json({ 
+    console.log('💚 Health check request recibido');
+    console.log('Headers de request:', req.headers);
+    
+    res.set({
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    });
+    
+    const healthData = { 
         status: 'OK', 
         message: 'MateMaster server is running',
         timestamp: new Date().toISOString(),
-        rankings: rankings.length 
-    });
+        rankings: rankings.length,
+        endpoints: ['/health', '/api/rankings'],
+        version: '2.0',
+        levels: 5
+    };
+    
+    console.log('💚 Enviando health response:', healthData);
+    res.status(200).json(healthData);
 });
 
 // Manejo de errores 404
