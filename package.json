@@ -1,29 +1,52 @@
 {
-  "name": "matemaster-twice",
+  "name": "trinidad-educational-games",
   "version": "1.0.0",
-  "description": "Juego educativo de matemáticas con temática TWICE",
-  "main": "server.js",
+  "description": "Centro de juegos educativos con MateMaster y Memorice",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "dev": "vite",
+    "build:vite": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.56.0",
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "lucide-react": "^0.541.0",
-    "path": "^0.12.7"
+    "@supabase/supabase-js": "^2.39.0",
+    "lucide-react": "^0.294.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1"
   },
-  "engines": {
-    "node": ">=14.0.0"
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "vite": "^5.0.8"
   },
-  "author": "Trinidad Proboste",
-  "license": "MIT",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "keywords": [
+    "educational",
+    "games",
     "mathematics",
-    "education",
-    "game",
-    "twice",
-    "kids"
-  ]
+    "react",
+    "supabase"
+  ],
+  "author": "Trinidad Proboste",
+  "license": "MIT"
 }
